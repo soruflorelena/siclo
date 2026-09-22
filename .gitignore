@@ -1,0 +1,19 @@
+# Variables de entorno
+.env
+
+# Archivos de configuración local
+config.local.php
+
+# Logs
+*.log
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editores
+.vscode/
+.idea/
+
+# Análisis inicial
+analisis-inicial.md
