@@ -19,12 +19,16 @@ try {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $folio = trim($_POST['folio']);
-    $centro_trabajo_id = $_POST['centro_trabajo_id'];
-    $falla = trim($_POST['falla']);
-    $numero_ticket = trim($_POST['numero_ticket']);
-    $serie = trim($_POST['serie']);
-    $numero_etiqueta = trim($_POST['numero_etiqueta']);
+    $folio = trim($_POST['folio'] ?? '');
+    $centro_trabajo_id = $_POST['centro_trabajo_id'] ?? '';
+    $falla = trim($_POST['falla'] ?? '');
+    $numero_ticket = trim($_POST['numero_ticket'] ?? '');
+    $serie = trim($_POST['serie'] ?? '');
+    
+    // El '??' evita el error de PHP si el campo no existe en el HTML
+    $numero_etiqueta = trim($_POST['numero_etiqueta'] ?? ''); 
+    $tipo_conector = $_POST['tipo_conector'] ?? 'USB';
+    
     $usuario_id = $_SESSION['usuario_id'];
 
     if (empty($folio) || empty($centro_trabajo_id) || empty($falla) || empty($serie)) {
@@ -40,18 +44,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Si el lector NO existe, lo creamos automáticamente
             if (!$lector) {
-                // Tomamos el RPE del usuario que inició sesión
                 $rpe_sesion = $_SESSION['rpe'];
                 $etiqueta_final = empty($numero_etiqueta) ? 'N/A' : $numero_etiqueta;
                 
-                // Insertamos usando el RPE de la sesión y 'N/A' solo para el conector
-                $sqlNuevoLector = "INSERT INTO lectores (numero_serie, centro_trabajo_id, rpe_asociado, tipo_conector) 
-                                   VALUES (:serie, :centro_trabajo_id, :rpe_sesion, 'N/A')";
+                // Usamos :tipo_conector en lugar de 'N/A'
+                $sqlNuevoLector = "INSERT INTO lectores (numero_serie, centro_trabajo_id, rpe_asociado, tipo_conector, numero_etiqueta, marca) 
+                                   VALUES (:serie, :centro_trabajo_id, :rpe_sesion, :tipo_conector, :etiqueta, 'N/A')";
                 $stmtNuevo = $pdo->prepare($sqlNuevoLector);
                 $stmtNuevo->execute([
                     'serie' => $serie,
                     'centro_trabajo_id' => $centro_trabajo_id,
-                    'rpe_sesion' => $rpe_sesion
+                    'rpe_sesion' => $rpe_sesion,
+                    'tipo_conector' => $tipo_conector,
+                    'etiqueta' => $etiqueta_final
                 ]);
                 $lector_id = $pdo->lastInsertId(); 
                 
@@ -128,6 +133,17 @@ require_once '../includes/encabezado.php';
         <div class="campo">
             <label for="serie">Número de Serie del Lector *</label>
             <input type="text" id="serie" name="serie" placeholder="Ingrese la serie exacta" required>
+        </div>
+        <div class="campo">
+            <label for="tipo_conector">Tipo de Conector (Si el equipo no está inventariado)</label>
+            <select id="tipo_conector" name="tipo_conector">
+                <option value="USB">USB (Por defecto)</option>
+                <option value="DB17">DB17</option>
+            </select>
+        </div>
+        <div class="campo">
+            <label for="numero_etiqueta">Número de Etiqueta (Si el equipo no está inventariado)</label>
+            <input type="text" id="numero_etiqueta" name="numero_etiqueta">
         </div>
         <div class="campo">
             <label for="centro_trabajo_id">Centro de Trabajo *</label>
