@@ -28,9 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $falla = trim($_POST['falla']);
     $numero_ticket = trim($_POST['numero_ticket']);
     $serie = trim($_POST['serie']);
-    // Estos campos se piden en el formulario por requerimiento, aunque el lector ya los tenga registrados
-    $tipo_conector = $_POST['tipo_conector']; 
-    $numero_etiqueta = trim($_POST['numero_etiqueta']);
 
     $usuario_id = $_SESSION['usuario_id']; // El ID se toma de la sesión, no del formulario
 
@@ -139,20 +136,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="campo">
                 <label for="serie">Número de Serie del Lector *</label>
                 <input type="text" id="serie" name="serie" placeholder="Ingrese la serie exacta" required>
-            </div>
-
-            <div class="campo">
-                <label for="tipo_conector">Tipo de Conector</label>
-                <select id="tipo_conector" name="tipo_conector">
-                    <option value="">-- Seleccione --</option>
-                    <option value="USB">USB</option>
-                    <option value="DB17">DB17</option>
-                </select>
-            </div>
-
-            <div class="campo">
-                <label for="numero_etiqueta">Número de Etiqueta</label>
-                <input type="text" id="numero_etiqueta" name="numero_etiqueta">
             </div>
 
             <div class="campo">
