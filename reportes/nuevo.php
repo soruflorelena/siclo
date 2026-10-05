@@ -127,7 +127,7 @@ require_once '../includes/encabezado.php';
             <input type="text" id="folio" name="folio" required>
         </div>
         <div class="campo">
-            <label for="numero_ticket">Número de Ticket (Opcional)</label>
+            <label for="numero_ticket">Número de Ticket</label>
             <input type="text" id="numero_ticket" name="numero_ticket">
         </div>
         <div class="campo">
@@ -135,14 +135,14 @@ require_once '../includes/encabezado.php';
             <input type="text" id="serie" name="serie" placeholder="Ingrese la serie exacta" required>
         </div>
         <div class="campo">
-            <label for="tipo_conector">Tipo de Conector (Si el equipo no está inventariado)</label>
+            <label for="tipo_conector">Tipo de Conector</label>
             <select id="tipo_conector" name="tipo_conector">
                 <option value="USB">USB (Por defecto)</option>
                 <option value="DB17">DB17</option>
             </select>
         </div>
         <div class="campo">
-            <label for="numero_etiqueta">Número de Etiqueta (Si el equipo no está inventariado)</label>
+            <label for="numero_etiqueta">Número de Etiqueta</label>
             <input type="text" id="numero_etiqueta" name="numero_etiqueta">
         </div>
         <div class="campo">
