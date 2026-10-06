@@ -21,8 +21,9 @@ require_once 'includes/encabezado.php';
         <div class="contenedor" style="flex: 1; min-width: 200px;">
             <h3>Gestión de Lectores</h3>
             <ul style="line-height: 1.8;">
-                <li><a href="lectores/nuevo.php">Agregar nuevo lector (Alta)</a></li>
-                <li><a href="lectores/recepcion.php">Recepción de equipos físicos</a></li>
+                <li><a href="lectores/nuevo.php">Agregar nuevo lector</a></li>
+                <li><a href="lectores/recepcion.php">Recepción de equipos</a></li>
+                <li><a href="lectores/devolucion.php">Devolución de equipos</a></li>
                 <li><a href="lectores/baja.php">Dar de baja un lector</a></li>
                 <li><a href="lectores/listado.php">Listado de inventario</a></li>
                 <li><a href="historial/general.php">Historial general</a></li>

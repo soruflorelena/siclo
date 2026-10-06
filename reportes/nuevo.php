@@ -23,13 +23,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $centro_trabajo_id = $_POST['centro_trabajo_id'] ?? '';
     $falla = trim($_POST['falla'] ?? '');
     $numero_ticket = trim($_POST['numero_ticket'] ?? '');
+
     $serie = trim($_POST['serie'] ?? '');
-    
-    // El '??' evita el error de PHP si el campo no existe en el HTML
     $numero_etiqueta = trim($_POST['numero_etiqueta'] ?? ''); 
-    $tipo_conector = $_POST['tipo_conector'] ?? 'USB';
-    
+    $tipo_conector = $_POST['tipo_conector'] ?? 'USB'; 
+    $marca = $_POST['marca'] ?? 'Leda TT8'; // Por defecto la primera opción
+    $observaciones = trim($_POST['observaciones'] ?? '');
     $usuario_id = $_SESSION['usuario_id'];
+    
 
     if (empty($folio) || empty($centro_trabajo_id) || empty($falla) || empty($serie)) {
         $error = 'Por favor, llena los campos obligatorios.';
@@ -47,16 +48,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $rpe_sesion = $_SESSION['rpe'];
                 $etiqueta_final = empty($numero_etiqueta) ? 'N/A' : $numero_etiqueta;
                 
-                // Usamos :tipo_conector en lugar de 'N/A'
+                // Actualizamos el INSERT para guardar la marca seleccionada
                 $sqlNuevoLector = "INSERT INTO lectores (numero_serie, centro_trabajo_id, rpe_asociado, tipo_conector, numero_etiqueta, marca) 
-                                   VALUES (:serie, :centro_trabajo_id, :rpe_sesion, :tipo_conector, :etiqueta, 'N/A')";
+                                VALUES (:serie, :centro_trabajo_id, :rpe_sesion, :tipo_conector, :etiqueta, :marca)";
                 $stmtNuevo = $pdo->prepare($sqlNuevoLector);
                 $stmtNuevo->execute([
                     'serie' => $serie,
                     'centro_trabajo_id' => $centro_trabajo_id,
                     'rpe_sesion' => $rpe_sesion,
                     'tipo_conector' => $tipo_conector,
-                    'etiqueta' => $etiqueta_final
+                    'etiqueta' => $etiqueta_final,
+                    'marca' => $marca
                 ]);
                 $lector_id = $pdo->lastInsertId(); 
                 
@@ -78,9 +80,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // ------------------------------------------------
 
             // 2. Insertar el reporte de falla
-            $sqlFalla = "INSERT INTO reportes_falla (folio, numero_ticket, falla, centro_trabajo_id, lector_id, usuario_id) 
-                        VALUES (:folio, :numero_ticket, :falla, :centro_trabajo_id, :lector_id, :usuario_id)";
-
+            // Insertar el reporte con observaciones
+            $sqlFalla = "INSERT INTO reportes_falla (folio, numero_ticket, falla, centro_trabajo_id, lector_id, usuario_id, observaciones) 
+                        VALUES (:folio, :numero_ticket, :falla, :centro_trabajo_id, :lector_id, :usuario_id, :observaciones)";
             $stmtFalla = $pdo->prepare($sqlFalla);
             $stmtFalla->execute([
                 'folio' => $folio,
@@ -88,7 +90,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'falla' => $falla,
                 'centro_trabajo_id' => $centro_trabajo_id,
                 'lector_id' => $lector_id,
-                'usuario_id' => $usuario_id
+                'usuario_id' => $usuario_id,
+                'observaciones' => empty($observaciones) ? null : $observaciones
             ]);
 
             // 3. Registrar la falla en el historial
@@ -149,6 +152,16 @@ require_once '../includes/encabezado.php';
             </select>
         </div>
         <div class="campo">
+            <label for="marca">Marca del Equipo</label>
+            <select id="marca" name="marca">
+                <option value="Jeda TT8">Jeda TT8</option>
+                <option value="Microtex/Electronics">Microtex/Electronics</option>
+                <option value="Davad">Davad</option>
+                <option value="Intelliprobe">Intelliprobe</option>
+                <option value="Otro">Otro</option>
+            </select>
+        </div>
+        <div class="campo">
             <label for="numero_etiqueta">Número de Etiqueta</label>
             <input type="text" id="numero_etiqueta" name="numero_etiqueta">
         </div>
@@ -164,6 +177,10 @@ require_once '../includes/encabezado.php';
         <div class="campo">
             <label for="falla">Descripción de la Falla *</label>
             <textarea id="falla" name="falla" required></textarea>
+        </div>
+        <div class="campo">
+            <label for="observaciones">Observaciones (Opcional)</label>
+            <textarea id="observaciones" name="observaciones"></textarea>
         </div>
         <button type="submit">Registrar Falla</button>
     </form>
