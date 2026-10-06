@@ -71,9 +71,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $lector_id = $lector['id'];
             }
 
+            // --- NUEVA LÓGICA: Cambiar estado a pendiente ---
+            $sqlEstado = "UPDATE lectores SET estado = 'PENDIENTE_RECEPCION' WHERE id = :lector_id";
+            $stmtEstado = $pdo->prepare($sqlEstado);
+            $stmtEstado->execute(['lector_id' => $lector_id]);
+            // ------------------------------------------------
+
             // 2. Insertar el reporte de falla
             $sqlFalla = "INSERT INTO reportes_falla (folio, numero_ticket, falla, centro_trabajo_id, lector_id, usuario_id) 
                         VALUES (:folio, :numero_ticket, :falla, :centro_trabajo_id, :lector_id, :usuario_id)";
+
             $stmtFalla = $pdo->prepare($sqlFalla);
             $stmtFalla->execute([
                 'folio' => $folio,
@@ -96,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
 
             $pdo->commit();
-            $mensaje = 'Falla reportada exitosamente. El equipo entró en inventario.';
+            $mensaje = 'Falla reportada exitosamente. El equipo ha sido registrado y está "Pendiente de Recepción".';
         } catch (PDOException $e) {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
