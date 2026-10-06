@@ -11,7 +11,7 @@ $pdo = obtener_conexion();
 $usuario_id = $_SESSION['usuario_id'];
 
 $sql = "SELECT r.folio, r.numero_ticket, r.falla, r.creado_en, 
-               l.numero_serie, c.nombre AS centro_trabajo 
+               l.numero_serie, l.estado, c.nombre AS centro_trabajo 
         FROM reportes_falla r
         INNER JOIN lectores l ON r.lector_id = l.id
         INNER JOIN centros_trabajo c ON r.centro_trabajo_id = c.id
@@ -38,6 +38,7 @@ require_once '../includes/encabezado.php';
                     <th>Ticket</th>
                     <th>Serie del Lector</th>
                     <th>Centro de Trabajo</th>
+                    <th>Estado Físico</th>
                     <th>Falla Reportada</th>
                 </tr>
             </thead>
@@ -49,6 +50,9 @@ require_once '../includes/encabezado.php';
                         <td><?php echo htmlspecialchars($reporte['numero_ticket'] ?? 'N/A'); ?></td>
                         <td><?php echo htmlspecialchars($reporte['numero_serie']); ?></td>
                         <td><?php echo htmlspecialchars($reporte['centro_trabajo']); ?></td>
+                        <td>
+                            <strong><?php echo htmlspecialchars($reporte['estado']); ?></strong>
+                        </td>
                         <td><?php echo htmlspecialchars($reporte['falla']); ?></td>
                     </tr>
                 <?php endforeach; ?>
