@@ -6,10 +6,8 @@ if (!isset($_SESSION['usuario_id'])) {
     exit;
 }
 
-// Opcional: Definimos el título de esta página antes de llamar al encabezado
 $titulo_pagina = 'Panel Principal - SICLO';
 
-// Incluimos la parte superior (diseño)
 require_once 'includes/encabezado.php';
 ?>
 
@@ -44,6 +42,5 @@ require_once 'includes/encabezado.php';
 </div>
 
 <?php 
-// Incluimos la parte inferior (cierre de etiquetas)
 require_once 'includes/pie.php'; 
 ?>

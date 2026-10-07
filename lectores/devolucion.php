@@ -23,13 +23,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo->beginTransaction();
 
-            // 1. Regresar el estado del lector a ACTIVO
+            // Regresar el estado del lector a ACTIVO
             $sqlUpdate = "UPDATE lectores SET estado = 'ACTIVO' WHERE id = :id";
             $stmtUpdate = $pdo->prepare($sqlUpdate);
             $stmtUpdate->execute(['id' => $lector_id]);
 
-            // 2. Registrar la entrega en el historial con lo que se le reparó
-            // Añadimos el RPE del receptor al historial
+            // Registrar la entrega en el historial con lo que se le reparó y añadir el RPE del receptor al historial
             $descripcion = "Equipo devuelto a operación. Entregado a RPE: $rpe_receptor. Detalles: " . ($detalles ?: 'Sin detalles adicionales');
             $sqlHistorial = "INSERT INTO historial (lector_id, accion, descripcion, usuario_id) 
                              VALUES (:lector_id, 'DEVOLUCION_EQUIPO', :descripcion, :usuario_id)";
@@ -51,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Obtener solo los equipos que están en revisión por TI
+// Obtener solo los equipos que están en revisión 
 try {
     $stmtRevision = $pdo->query("SELECT id, numero_serie FROM lectores WHERE estado = 'EN_REVISION' ORDER BY numero_serie ASC");
     $en_revision = $stmtRevision->fetchAll();
@@ -65,7 +64,7 @@ require_once '../includes/encabezado.php';
 
 <div class="contenedor" style="max-width: 600px; margin: 0 auto;">
     <a href="../panel.php" class="boton-volver">← Volver al Panel</a>
-    <h2>Devolución de Equipos (Fin de revisión)</h2>
+    <h2>Devolución de Equipos</h2>
 
     <?php if ($mensaje): ?>
         <p style="color: green; font-weight: bold; padding: 10px; background-color: #e8f5e9;"><?php echo htmlspecialchars($mensaje); ?></p>

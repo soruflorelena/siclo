@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// Proteger la página: Solo Administradores
+// Solo el administrador puede recibir equipos
 if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'ADMINISTRADOR') {
     header("Location: ../panel.php");
     exit;
@@ -23,12 +23,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo->beginTransaction();
 
-            // 1. Cambiar el estado del lector a EN_REVISION
+            // Cambiar el estado del lector a EN_REVISION
             $sqlUpdate = "UPDATE lectores SET estado = 'EN_REVISION' WHERE id = :id";
             $stmtUpdate = $pdo->prepare($sqlUpdate);
             $stmtUpdate->execute(['id' => $lector_id]);
 
-            // 2. Registrar el movimiento en el historial
+            // Registrar el movimiento en el historial
             $sqlHistorial = "INSERT INTO historial (lector_id, accion, descripcion, usuario_id) 
                              VALUES (:lector_id, 'RECEPCION_EQUIPO', 'El equipo ha sido recibido y ahora está EN REVISIÓN', :usuario_id)";
             $stmtHistorial = $pdo->prepare($sqlHistorial);
@@ -84,7 +84,7 @@ require_once '../includes/encabezado.php';
                     <?php endforeach; ?>
                 </select>
             </div>
-            <button type="submit" style="background-color: #0288d1;">Confirmar Recepción (Activar)</button>
+            <button type="submit" style="background-color: #0288d1;">Confirmar Recepción</button>
         </form>
     <?php else: ?>
         <p style="padding: 15px; background-color: #e0f7fa; border-radius: 4px; color: #006064;">

@@ -25,12 +25,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo->beginTransaction();
 
-            // 1. Cambiar el estado del lector definitivamente a 'BAJA'
+            // Cambiar el estado del lector definitivamente a 'BAJA'
             $sqlBaja = "UPDATE lectores SET estado = 'BAJA' WHERE id = :id";
             $stmtBaja = $pdo->prepare($sqlBaja);
             $stmtBaja->execute(['id' => $lector_id]);
 
-            // 2. Registrar la baja en el historial
+            // Registrar la baja en el historial
             $descripcion = "Baja por $motivo. Detalles: " . ($detalles ?: 'Sin detalles adicionales');
             $sqlHistorial = "INSERT INTO historial (lector_id, accion, descripcion, usuario_id) 
                              VALUES (:lector_id, 'BAJA_EQUIPO', :descripcion, :usuario_id)";
@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Obtener los lectores que NO están de baja (pueden ser Activos o en Revisión)
+// Obtener los lectores que no están de baja 
 try {
     $stmtLectores = $pdo->query("SELECT id, numero_serie, estado, numero_etiqueta FROM lectores WHERE estado != 'BAJA' ORDER BY numero_serie");
     $lectores_disponibles = $stmtLectores->fetchAll();

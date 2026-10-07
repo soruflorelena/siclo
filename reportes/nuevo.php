@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $serie = trim($_POST['serie'] ?? '');
     $numero_etiqueta = trim($_POST['numero_etiqueta'] ?? ''); 
     $tipo_conector = $_POST['tipo_conector'] ?? 'USB'; 
-    $marca = $_POST['marca'] ?? 'Leda TT8'; // Por defecto la primera opción
+    $marca = $_POST['marca'] ?? 'Jeda TT8'; 
     $observaciones = trim($_POST['observaciones'] ?? '');
     $usuario_id = $_SESSION['usuario_id'];
     
@@ -38,17 +38,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo->beginTransaction();
 
-            // 1. Buscar si el lector ya existe
+            // Buscar si el lector ya existe
             $stmtLector = $pdo->prepare("SELECT id FROM lectores WHERE numero_serie = :serie LIMIT 1");
             $stmtLector->execute(['serie' => $serie]);
             $lector = $stmtLector->fetch();
 
-            // Si el lector NO existe, lo creamos automáticamente
+            // Si el lector no existe, se crea automáticamente
             if (!$lector) {
                 $rpe_sesion = $_SESSION['rpe'];
                 $etiqueta_final = empty($numero_etiqueta) ? 'N/A' : $numero_etiqueta;
                 
-                // Actualizamos el INSERT para guardar la marca seleccionada
+                // Actualizar el INSERT para guardar la marca seleccionada
                 $sqlNuevoLector = "INSERT INTO lectores (numero_serie, centro_trabajo_id, rpe_asociado, tipo_conector, numero_etiqueta, marca) 
                                 VALUES (:serie, :centro_trabajo_id, :rpe_sesion, :tipo_conector, :etiqueta, :marca)";
                 $stmtNuevo = $pdo->prepare($sqlNuevoLector);
@@ -73,14 +73,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $lector_id = $lector['id'];
             }
 
-            // --- NUEVA LÓGICA: Cambiar estado a pendiente ---
             $sqlEstado = "UPDATE lectores SET estado = 'PENDIENTE_RECEPCION' WHERE id = :lector_id";
             $stmtEstado = $pdo->prepare($sqlEstado);
             $stmtEstado->execute(['lector_id' => $lector_id]);
-            // ------------------------------------------------
 
-            // 2. Insertar el reporte de falla
-            // Insertar el reporte con observaciones
+            // Insertar el reporte de falla con observaciones
             $sqlFalla = "INSERT INTO reportes_falla (folio, numero_ticket, falla, centro_trabajo_id, lector_id, usuario_id, observaciones) 
                         VALUES (:folio, :numero_ticket, :falla, :centro_trabajo_id, :lector_id, :usuario_id, :observaciones)";
             $stmtFalla = $pdo->prepare($sqlFalla);
@@ -94,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'observaciones' => empty($observaciones) ? null : $observaciones
             ]);
 
-            // 3. Registrar la falla en el historial
+            // Registrar la falla en el historial
             $descripcion_historial = "Falla reportada. Folio: $folio. Ticket: " . ($numero_ticket ?: 'N/A');
             $sqlHistorial = "INSERT INTO historial (lector_id, accion, descripcion, usuario_id) 
                              VALUES (:lector_id, 'REPORTE_FALLA', :descripcion, :usuario_id)";

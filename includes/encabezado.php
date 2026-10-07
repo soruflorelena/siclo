@@ -1,9 +1,9 @@
 <?php
-// Asegurarnos de que la sesión esté iniciada para poder leer los datos del usuario
+// Asegurar que la sesión esté iniciada
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-// Permitir que cada página defina su propio título, si no, usar uno por defecto
+// Definir el título de la página si no se ha definido
 $titulo = $titulo_pagina ?? 'SICLO';
 ?>
 <!DOCTYPE html>
@@ -52,7 +52,6 @@ $titulo = $titulo_pagina ?? 'SICLO';
         <div class="enlaces-header">
             <?php if (isset($_SESSION['usuario_id'])): ?>
                 <span><?php echo htmlspecialchars($_SESSION['rpe']); ?> (<?php echo htmlspecialchars($_SESSION['rol']); ?>)</span>
-                <!-- Usamos /siclo/ para que la ruta funcione sin importar en qué subcarpeta estemos -->
                 <a href="/panel.php">Inicio</a>
                 <a href="/cerrar_sesion.php">Cerrar sesión</a>
             <?php endif; ?>
