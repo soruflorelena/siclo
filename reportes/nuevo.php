@@ -19,7 +19,7 @@ try {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $folio = trim($_POST['folio'] ?? '');
+    $folio = 'R-' . mt_rand(10000, 99999);
     $centro_trabajo_id = $_POST['centro_trabajo_id'] ?? '';
     $falla = trim($_POST['falla'] ?? '');
     $numero_ticket = trim($_POST['numero_ticket'] ?? '');
@@ -103,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
 
             $pdo->commit();
-            $mensaje = 'Falla reportada exitosamente. El equipo ha sido registrado y está "Pendiente de Recepción".';
+            $mensaje = "Falla reportada exitosamente con el folio: $folio. El equipo está 'Pendiente de Recepción'.";
         } catch (PDOException $e) {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
@@ -129,10 +129,6 @@ require_once '../includes/encabezado.php';
     <?php endif; ?>
 
     <form method="POST" action="nuevo.php">
-        <div class="campo">
-            <label for="folio">Folio *</label>
-            <input type="text" id="folio" name="folio" required>
-        </div>
         <div class="campo">
             <label for="numero_ticket">Número de Ticket</label>
             <input type="text" id="numero_ticket" name="numero_ticket">
