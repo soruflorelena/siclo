@@ -12,13 +12,14 @@ $pdo = obtener_conexion();
 $mensaje = '';
 $error = '';
 
-// Si el Administrador envía el formulario confirmando la recepción
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $lector_id = $_POST['lector_id'] ?? '';
+    $rpe_entrega = trim($_POST['rpe_entrega'] ?? '');
+    $rpe_recibe = trim($_POST['rpe_recibe'] ?? '');
     $usuario_id = $_SESSION['usuario_id'];
 
-    if (empty($lector_id)) {
-        $error = "Por favor selecciona un equipo para recibir.";
+    if (empty($lector_id) || empty($rpe_entrega) || empty($rpe_recibe)) {
+        $error = "Por favor selecciona un equipo y llena los RPE de entrega y recepción.";
     } else {
         try {
             $pdo->beginTransaction();
@@ -28,17 +29,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmtUpdate = $pdo->prepare($sqlUpdate);
             $stmtUpdate->execute(['id' => $lector_id]);
 
-            // Registrar el movimiento en el historial
+            // 2. Registrar el movimiento en el historial con los RPE involucrados
+            $descripcion = "Equipo recibido físicamente en TIC's. Entregó (RPE): $rpe_entrega. Recibió (RPE): $rpe_recibe.";
             $sqlHistorial = "INSERT INTO historial (lector_id, accion, descripcion, usuario_id) 
-                             VALUES (:lector_id, 'RECEPCION_EQUIPO', 'El equipo ha sido recibido y ahora está EN REVISIÓN', :usuario_id)";
+                             VALUES (:lector_id, 'RECEPCION_EQUIPO', :descripcion, :usuario_id)";
             $stmtHistorial = $pdo->prepare($sqlHistorial);
             $stmtHistorial->execute([
                 'lector_id' => $lector_id,
+                'descripcion' => $descripcion,
                 'usuario_id' => $usuario_id
             ]);
 
             $pdo->commit();
-            $mensaje = "El equipo ha sido recibido y ahora está ACTIVO en el inventario.";
+            $mensaje = "El equipo ha sido recibido y ahora está EN REVISIÓN por el departamento de TIC's.";
         } catch (PDOException $e) {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
@@ -83,7 +86,18 @@ require_once '../includes/encabezado.php';
                         </option>
                     <?php endforeach; ?>
                 </select>
+            </div> 
+
+            <div class="campo">
+                <label for="rpe_entrega">RPE de quien entrega el equipo físico (Responsable de Entrega) *</label>
+                <input type="text" id="rpe_entrega" name="rpe_entrega" required placeholder="Ej. ABCD1">
             </div>
+
+            <div class="campo">
+                <label for="rpe_recibe">RPE de quien recibe en TIC's *</label>
+                <input type="text" id="rpe_recibe" name="rpe_recibe" required placeholder="Ej. EFGJ2">
+            </div>
+            
             <button type="submit" style="background-color: #0288d1;">Confirmar Recepción</button>
         </form>
     <?php else: ?>

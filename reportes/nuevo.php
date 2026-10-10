@@ -27,7 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $serie = trim($_POST['serie'] ?? '');
     $numero_etiqueta = trim($_POST['numero_etiqueta'] ?? ''); 
     $tipo_conector = $_POST['tipo_conector'] ?? 'USB'; 
-    $marca = $_POST['marca'] ?? 'Jeda TT8'; 
+    $marca = $_POST['marca'] ?? 'Jedda TT8';
+    if ($marca === 'Otro') {
+        $marca = trim($_POST['otra_marca'] ?? 'Otra marca');
+    }
     $observaciones = trim($_POST['observaciones'] ?? '');
     $usuario_id = $_SESSION['usuario_id'];
     
@@ -145,15 +148,36 @@ require_once '../includes/encabezado.php';
             </select>
         </div>
         <div class="campo">
-            <label for="marca">Marca del Equipo</label>
-            <select id="marca" name="marca">
-                <option value="Jeda TT8">Jeda TT8</option>
+            <label for="marca">Marca del equipo</label>
+            <select id="marca" name="marca" onchange="mostrarCajaOtraMarca(this.value)">
+                <option value="Jedda TT8">Jedda TT8</option>
                 <option value="Microtex/Electronics">Microtex/Electronics</option>
-                <option value="Davad">Davad</option>
+                <option value="Deval">Deval</option>
                 <option value="Intelliprobe">Intelliprobe</option>
-                <option value="Otro">Otro</option>
+                <option value="Otro">Otro (Especificar)</option>
             </select>
         </div>
+
+        <div class="campo" id="div_otra_marca" style="display: none;">
+            <label for="otra_marca">Especifique la marca *</label>
+            <input type="text" id="otra_marca" name="otra_marca" placeholder="Escriba el nombre de la marca">
+        </div>
+
+        <script>
+        function mostrarCajaOtraMarca(valorSeleccionado) {
+            var divOculto = document.getElementById('div_otra_marca');
+            var inputOtra = document.getElementById('otra_marca');
+            
+            if (valorSeleccionado === 'Otro') {
+                divOculto.style.display = 'block'; // Muestra la caja
+                inputOtra.required = true;         // Hace que sea obligatorio llenarla
+            } else {
+                divOculto.style.display = 'none';  // Oculta la caja
+                inputOtra.required = false;        // Quita la obligatoriedad
+                inputOtra.value = '';              // Limpia el texto por si se arrepiente
+            }
+        }
+        </script>
         <div class="campo">
             <label for="numero_etiqueta">Número de Etiqueta</label>
             <input type="text" id="numero_etiqueta" name="numero_etiqueta">
