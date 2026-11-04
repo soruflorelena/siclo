@@ -9,7 +9,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'ADMINISTRADOR') {
 require_once '../config/base_datos.php';
 $pdo = obtener_conexion();
 
-// Recibir el ID del lector por la URL (GET)
+// Recibir el ID del lector por la URL 
 $lector_id = $_GET['id'] ?? '';
 
 if (empty($lector_id)) {
@@ -26,7 +26,7 @@ try {
         die("El lector no existe en la base de datos.");
     }
 
-    // 2. Obtener SOLAMENTE el historial de este lector
+    // Obtener el historial de este lector
     $sqlHistorial = "SELECT h.accion, h.descripcion, h.creado_en, u.rpe AS usuario 
                      FROM historial h 
                      JOIN usuarios u ON h.usuario_id = u.id 

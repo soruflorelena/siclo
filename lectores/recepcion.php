@@ -75,7 +75,7 @@ require_once '../includes/encabezado.php';
     <?php endif; ?>
 
     <?php if (count($pendientes) > 0): ?>
-        <form method="POST" action="recepcion.php">
+        <form method="POST" action="recepcion.php" onsubmit="return confirm('¿Confirmas que tienes el equipo físicamente en tus manos y procedes a recibirlo?');">
             <div class="campo">
                 <label for="lector_id">Equipos en Tránsito (Pendientes) *</label>
                 <select id="lector_id" name="lector_id" required>

@@ -75,7 +75,7 @@ require_once '../includes/encabezado.php';
         <p style="color: red; font-weight: bold; padding: 10px; background-color: #ffebee;"><?php echo htmlspecialchars($error); ?></p>
     <?php endif; ?>
 
-    <form method="POST" action="baja.php">
+    <form method="POST" action="baja.php" onsubmit="return confirm('¿Está seguro de dar de baja definitiva a este equipo?.');">
         <div class="campo">
             <label for="lector_id">Seleccionar Equipo a desechar *</label>
             <select id="lector_id" name="lector_id" required>

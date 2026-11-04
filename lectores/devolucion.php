@@ -74,7 +74,7 @@ require_once '../includes/encabezado.php';
     <?php endif; ?>
 
     <?php if (count($en_revision) > 0): ?>
-        <form method="POST" action="devolucion.php">
+        <form method="POST" action="devolucion.php" onsubmit="return confirm('¿Confirmas que el equipo fue reparado y se entrega correctamente?');">
             <div class="campo">
                 <label for="lector_id">Equipos en Revisión *</label>
                 <select id="lector_id" name="lector_id" required>

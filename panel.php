@@ -82,11 +82,10 @@ require_once 'includes/encabezado.php';
                     <a href="lectores/devolucion.php" class="btn-panel btn-green">Devolver Equipo Reparado</a>
                 </div>
 
-                <!-- Grupo 3: Bajas y Auditoría -->
                 <div class="tarjeta-panel">
                     <h4>Control y Bajas</h4>
                     <a href="lectores/baja.php" class="btn-panel btn-red">Dar de Baja un Equipo</a>
-                    <a href="historial/general.php" class="btn-panel btn-dark">Auditoría (Historial Global)</a>
+                    <a href="historial/general.php" class="btn-panel btn-dark">Historial General</a>
                 </div>
             </div>
         </div>

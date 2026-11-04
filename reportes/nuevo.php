@@ -38,80 +38,88 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($folio) || empty($centro_trabajo_id) || empty($falla) || empty($serie)) {
         $error = 'Por favor, llena los campos obligatorios.';
     } else {
-        try {
-            $pdo->beginTransaction();
+        $stmtVerificar = $pdo->prepare("SELECT estado FROM lectores WHERE numero_serie = :serie");
+        $stmtVerificar->execute(['serie' => $serie]);
+        $lectorExistente = $stmtVerificar->fetch();
 
-            // Buscar si el lector ya existe
-            $stmtLector = $pdo->prepare("SELECT id FROM lectores WHERE numero_serie = :serie LIMIT 1");
-            $stmtLector->execute(['serie' => $serie]);
-            $lector = $stmtLector->fetch();
+        if ($lectorExistente && in_array($lectorExistente['estado'], ['PENDIENTE_RECEPCION', 'EN_REVISION'])) {
+            $error = "El equipo con serie $serie ya tiene un reporte activo y actualmente se encuentra " . $lectorExistente['estado'] . ". No se puede duplicar el reporte.";
+        } else {
+            try {
+                $pdo->beginTransaction();
 
-            // Si el lector no existe, se crea automáticamente
-            if (!$lector) {
-                $rpe_sesion = $_SESSION['rpe'];
-                $etiqueta_final = empty($numero_etiqueta) ? 'N/A' : $numero_etiqueta;
-                
-                // Actualizar el INSERT para guardar la marca seleccionada
-                $sqlNuevoLector = "INSERT INTO lectores (numero_serie, centro_trabajo_id, rpe_asociado, tipo_conector, numero_etiqueta, marca) 
-                                VALUES (:serie, :centro_trabajo_id, :rpe_sesion, :tipo_conector, :etiqueta, :marca)";
-                $stmtNuevo = $pdo->prepare($sqlNuevoLector);
-                $stmtNuevo->execute([
-                    'serie' => $serie,
+                // Buscar si el lector ya existe para obtener su ID
+                $stmtLector = $pdo->prepare("SELECT id FROM lectores WHERE numero_serie = :serie LIMIT 1");
+                $stmtLector->execute(['serie' => $serie]);
+                $lector = $stmtLector->fetch();
+
+                // Si el lector no existe, se crea automáticamente
+                if (!$lector) {
+                    $rpe_sesion = $_SESSION['rpe'];
+                    $etiqueta_final = empty($numero_etiqueta) ? 'N/A' : $numero_etiqueta;
+                    
+                    // Actualizar el INSERT para guardar la marca seleccionada
+                    $sqlNuevoLector = "INSERT INTO lectores (numero_serie, centro_trabajo_id, rpe_asociado, tipo_conector, numero_etiqueta, marca) 
+                                    VALUES (:serie, :centro_trabajo_id, :rpe_sesion, :tipo_conector, :etiqueta, :marca)";
+                    $stmtNuevo = $pdo->prepare($sqlNuevoLector);
+                    $stmtNuevo->execute([
+                        'serie' => $serie,
+                        'centro_trabajo_id' => $centro_trabajo_id,
+                        'rpe_sesion' => $rpe_sesion,
+                        'tipo_conector' => $tipo_conector,
+                        'etiqueta' => $etiqueta_final,
+                        'marca' => $marca
+                    ]);
+                    $lector_id = $pdo->lastInsertId(); 
+                    
+                    $sqlHistorialAlta = "INSERT INTO historial (lector_id, accion, descripcion, usuario_id) 
+                                         VALUES (:lector_id, 'ALTA_AUTOMATICA', 'Alta automática al reportar falla', :usuario_id)";
+                    $stmtHistorialAlta = $pdo->prepare($sqlHistorialAlta);
+                    $stmtHistorialAlta->execute([
+                        'lector_id' => $lector_id,
+                        'usuario_id' => $usuario_id
+                    ]);
+                } else {
+                    $lector_id = $lector['id'];
+                }
+
+                $sqlEstado = "UPDATE lectores SET estado = 'PENDIENTE_RECEPCION' WHERE id = :lector_id";
+                $stmtEstado = $pdo->prepare($sqlEstado);
+                $stmtEstado->execute(['lector_id' => $lector_id]);
+
+                // Insertar el reporte de falla con observaciones
+                $sqlFalla = "INSERT INTO reportes_falla (folio, numero_ticket, falla, centro_trabajo_id, lector_id, usuario_id, observaciones) 
+                            VALUES (:folio, :numero_ticket, :falla, :centro_trabajo_id, :lector_id, :usuario_id, :observaciones)";
+                $stmtFalla = $pdo->prepare($sqlFalla);
+                $stmtFalla->execute([
+                    'folio' => $folio,
+                    'numero_ticket' => empty($numero_ticket) ? null : $numero_ticket,
+                    'falla' => $falla,
                     'centro_trabajo_id' => $centro_trabajo_id,
-                    'rpe_sesion' => $rpe_sesion,
-                    'tipo_conector' => $tipo_conector,
-                    'etiqueta' => $etiqueta_final,
-                    'marca' => $marca
-                ]);
-                $lector_id = $pdo->lastInsertId(); 
-                
-                $sqlHistorialAlta = "INSERT INTO historial (lector_id, accion, descripcion, usuario_id) 
-                                     VALUES (:lector_id, 'ALTA_AUTOMATICA', 'Alta automática al reportar falla', :usuario_id)";
-                $stmtHistorialAlta = $pdo->prepare($sqlHistorialAlta);
-                $stmtHistorialAlta->execute([
                     'lector_id' => $lector_id,
+                    'usuario_id' => $usuario_id,
+                    'observaciones' => empty($observaciones) ? null : $observaciones
+                ]);
+
+                // Registrar la falla en el historial
+                $descripcion_historial = "Falla reportada. Folio: $folio. Ticket: " . ($numero_ticket ?: 'N/A');
+                $sqlHistorial = "INSERT INTO historial (lector_id, accion, descripcion, usuario_id) 
+                                 VALUES (:lector_id, 'REPORTE_FALLA', :descripcion, :usuario_id)";
+                $stmtHistorial = $pdo->prepare($sqlHistorial);
+                $stmtHistorial->execute([
+                    'lector_id' => $lector_id,
+                    'descripcion' => $descripcion_historial,
                     'usuario_id' => $usuario_id
                 ]);
-            } else {
-                $lector_id = $lector['id'];
+
+                $pdo->commit();
+                $mensaje = "Falla reportada exitosamente con el folio: $folio. El equipo está 'Pendiente de Recepción'.";
+            } catch (PDOException $e) {
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                $error = 'Error al registrar la falla: ' . $e->getMessage();
             }
-
-            $sqlEstado = "UPDATE lectores SET estado = 'PENDIENTE_RECEPCION' WHERE id = :lector_id";
-            $stmtEstado = $pdo->prepare($sqlEstado);
-            $stmtEstado->execute(['lector_id' => $lector_id]);
-
-            // Insertar el reporte de falla con observaciones
-            $sqlFalla = "INSERT INTO reportes_falla (folio, numero_ticket, falla, centro_trabajo_id, lector_id, usuario_id, observaciones) 
-                        VALUES (:folio, :numero_ticket, :falla, :centro_trabajo_id, :lector_id, :usuario_id, :observaciones)";
-            $stmtFalla = $pdo->prepare($sqlFalla);
-            $stmtFalla->execute([
-                'folio' => $folio,
-                'numero_ticket' => empty($numero_ticket) ? null : $numero_ticket,
-                'falla' => $falla,
-                'centro_trabajo_id' => $centro_trabajo_id,
-                'lector_id' => $lector_id,
-                'usuario_id' => $usuario_id,
-                'observaciones' => empty($observaciones) ? null : $observaciones
-            ]);
-
-            // Registrar la falla en el historial
-            $descripcion_historial = "Falla reportada. Folio: $folio. Ticket: " . ($numero_ticket ?: 'N/A');
-            $sqlHistorial = "INSERT INTO historial (lector_id, accion, descripcion, usuario_id) 
-                             VALUES (:lector_id, 'REPORTE_FALLA', :descripcion, :usuario_id)";
-            $stmtHistorial = $pdo->prepare($sqlHistorial);
-            $stmtHistorial->execute([
-                'lector_id' => $lector_id,
-                'descripcion' => $descripcion_historial,
-                'usuario_id' => $usuario_id
-            ]);
-
-            $pdo->commit();
-            $mensaje = "Falla reportada exitosamente con el folio: $folio. El equipo está 'Pendiente de Recepción'.";
-        } catch (PDOException $e) {
-            if ($pdo->inTransaction()) {
-                $pdo->rollBack();
-            }
-            $error = 'Error al registrar la falla: ' . $e->getMessage();
         }
     }
 }
@@ -169,12 +177,12 @@ require_once '../includes/encabezado.php';
             var inputOtra = document.getElementById('otra_marca');
             
             if (valorSeleccionado === 'Otro') {
-                divOculto.style.display = 'block'; // Muestra la caja
-                inputOtra.required = true;         // Hace que sea obligatorio llenarla
+                divOculto.style.display = 'block'; 
+                inputOtra.required = true;        
             } else {
-                divOculto.style.display = 'none';  // Oculta la caja
-                inputOtra.required = false;        // Quita la obligatoriedad
-                inputOtra.value = '';              // Limpia el texto por si se arrepiente
+                divOculto.style.display = 'none';  
+                inputOtra.required = false;       
+                inputOtra.value = '';              
             }
         }
         </script>
