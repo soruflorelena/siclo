@@ -82,8 +82,11 @@ require_once '../includes/encabezado.php';
                                 <?php echo htmlspecialchars($lector['estado']); ?>
                             </span>
                         </td>
-                        <td>
-                            <!-- Botón que lleva a la página de historial específico -->
+                        <td style="display: flex; gap: 5px;">
+                            <!-- Botón para Editar -->
+                            <a href="editar.php?id=<?php echo $lector['id']; ?>" style="background-color: #0288d1; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 0.9em;">Editar</a>
+                            
+                            <!-- Botón para Ver Historial -->
                             <a href="../historial/lector.php?id=<?php echo $lector['id']; ?>" style="background-color: #455a64; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 0.9em;">Ver Historial</a>
                         </td>
                     </tr>

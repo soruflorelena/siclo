@@ -90,12 +90,12 @@ require_once '../includes/encabezado.php';
 
             <div class="campo">
                 <label for="rpe_entrega">RPE de quien entrega el equipo físico (Responsable de Entrega) *</label>
-                <input type="text" id="rpe_entrega" name="rpe_entrega" required placeholder="Ej. ABCD1">
+                <input type="text" id="rpe_entrega" name="rpe_entrega">
             </div>
 
             <div class="campo">
                 <label for="rpe_recibe">RPE de quien recibe en TIC's *</label>
-                <input type="text" id="rpe_recibe" name="rpe_recibe" required placeholder="Ej. EFGJ2">
+                <input type="text" id="rpe_recibe" name="rpe_recibe">
             </div>
             
             <button type="submit" style="background-color: #0288d1;">Confirmar Recepción</button>

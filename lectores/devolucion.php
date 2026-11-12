@@ -87,8 +87,8 @@ require_once '../includes/encabezado.php';
                 </select>
             </div>
             <div class="campo">
-                <label for="rpe_receptor">RPE de quien recibe el equipo (Recibí Equipo Reparado) *</label>
-                <input type="text" id="rpe_receptor" name="rpe_receptor" required placeholder="Ej. ABCD1">
+                <label for="rpe_receptor">RPE de quien recibe el equipo *</label>
+                <input type="text" id="rpe_receptor" name="rpe_receptor">
             </div>
 
             <div class="campo">
