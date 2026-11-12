@@ -68,16 +68,14 @@ require_once 'includes/encabezado.php';
             <h3 style="border-bottom: 2px solid #0288d1; padding-bottom: 10px; margin-bottom: 20px; color: #1a237e;">Panel de Control</h3>
             
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-                <!-- Grupo 1: Inventario -->
                 <div class="tarjeta-panel">
                     <h4>Inventario</h4>
                     <a href="lectores/listado.php" class="btn-panel btn-blue">Ver Inventario Total</a>
                     <a href="lectores/nuevo.php" class="btn-panel btn-teal">Alta de Lector Nuevo</a>
                 </div>
 
-                <!-- Grupo 2: Reparaciones -->
                 <div class="tarjeta-panel">
-                    <h4>Reparaciones</h4>
+                    <h4>Recepciones</h4>
                     <a href="lectores/recepcion.php" class="btn-panel btn-orange">Recibir Equipo Dañado</a>
                     <a href="lectores/devolucion.php" class="btn-panel btn-green">Devolver Equipo Reparado</a>
                 </div>

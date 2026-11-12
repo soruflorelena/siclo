@@ -92,7 +92,7 @@ require_once '../includes/encabezado.php';
             </div>
 
             <div class="campo">
-                <label for="detalles">¿Qué se le reparó?</label>
+                <label for="detalles">Actividades Realizadas</label>
                 <textarea id="detalles" name="detalles" placeholder="Ej: Se cambió el cable USB, se limpió el lente, etc."></textarea>
             </div>
 
