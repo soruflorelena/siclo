@@ -1,5 +1,8 @@
 <?php
 session_start();
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
 
 if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'ADMINISTRADOR') {
     header("Location: ../panel.php");
@@ -72,9 +75,35 @@ require_once '../includes/encabezado.php';
             <input type="text" id="numero_serie" name="numero_serie" required>
         </div>
         <div class="campo">
-            <label for="marca">Marca</label>
-            <input type="text" id="marca" name="marca">
+            <label for="marca">Marca del equipo *</label>
+            <select id="marca" name="marca" onchange="mostrarCajaOtraMarca(this.value)">
+                <option value="Jeda TT8">Jeda TT8</option>
+                <option value="Microtex/Electronics">Microtex/Electronics</option>
+                <option value="Davad">DAVAD</option>
+                <option value="Intelliprobe">Intelliprobe</option>
+                <option value="Otro">Otro (Especificar)</option>
+            </select>
         </div>
+
+        <div class="campo" id="div_otra_marca" style="display: none;">
+            <label for="otra_marca">Especifique la marca *</label>
+            <input type="text" id="otra_marca" name="otra_marca" placeholder="Escriba el nombre de la marca">
+        </div>
+
+        <script>
+        function mostrarCajaOtraMarca(valorSeleccionado) {
+            var divOculto = document.getElementById('div_otra_marca');
+            var inputOtra = document.getElementById('otra_marca');
+            if (valorSeleccionado === 'Otro') {
+                divOculto.style.display = 'block'; 
+                inputOtra.required = true;         
+            } else {
+                divOculto.style.display = 'none';  
+                inputOtra.required = false;        
+                inputOtra.value = '';              
+            }
+        }
+        </script>
         <div class="campo">
             <label for="tipo_conector">Tipo de Conector *</label>
             <select id="tipo_conector" name="tipo_conector" required>

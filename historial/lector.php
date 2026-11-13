@@ -50,8 +50,7 @@ require_once '../includes/encabezado.php';
     
     <div style="background-color: #455a64; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
         <h2 style="margin: 0; color: white;">Historial del Equipo: <?php echo htmlspecialchars($lector['numero_serie']); ?></h2>
-        <p style="margin: 5px 0 0 0;">Estado Actual: <strong><?php echo htmlspecialchars($lector['estado']); ?></strong></p>
-    </div>
+        <p style="margin: 5px 0 0 0;">Estado Actual: <strong><?php echo htmlspecialchars(ucwords(strtolower(str_replace('_', ' ', $lector['estado'])))); ?>
 
     <table>
         <thead>

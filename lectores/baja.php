@@ -1,5 +1,8 @@
 <?php
 session_start();
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
 
 // Solo el Administrador puede dar de baja equipos
 if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'ADMINISTRADOR') {
@@ -83,7 +86,7 @@ require_once '../includes/encabezado.php';
                 <?php foreach ($lectores_disponibles as $lector): ?>
                     <option value="<?php echo $lector['id']; ?>">
                         Serie: <?php echo htmlspecialchars($lector['numero_serie']); ?> 
-                        (Estado actual: <?php echo htmlspecialchars($lector['estado']); ?>)
+                        (Estado actual: <?php echo htmlspecialchars(ucwords(strtolower(str_replace('_', ' ', $lector['estado'])))); ?>)
                     </option>
                 <?php endforeach; ?>
             </select>

@@ -79,7 +79,7 @@ require_once '../includes/encabezado.php';
                                 if ($lector['estado'] === 'BAJA') $color = 'red';
                             ?>
                             <span style="font-weight: bold; color: <?php echo $color; ?>;">
-                                <?php echo htmlspecialchars($lector['estado']); ?>
+                                <?php echo htmlspecialchars(ucwords(strtolower(str_replace('_', ' ', $lector['estado'])))); ?>
                             </span>
                         </td>
                         <td style="display: flex; gap: 5px;">
