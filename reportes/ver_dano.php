@@ -24,7 +24,7 @@ require_once '../includes/encabezado.php';
 ?>
 
 <div class="contenedor" style="max-width: 600px; margin: 0 auto; text-align: center;">
-    <a href="javascript:history.back();" class="btn-volver">← Volver al Inventario</a>
+    <a href="inventario.php" class="btn-volver">← Volver</a>
     <h2>Daño Físico Reportado (Folio: <?php echo htmlspecialchars($folio); ?>)</h2>
     
     <?php if ($x !== null && $y !== null): ?>
