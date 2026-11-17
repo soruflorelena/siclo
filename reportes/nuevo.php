@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $serie = trim($_POST['serie'] ?? '');
     $numero_etiqueta = trim($_POST['numero_etiqueta'] ?? ''); 
     $tipo_conector = $_POST['tipo_conector'] ?? 'USB'; 
-    $marca = $_POST['marca'] ?? 'Jedda TT8';
+    $marca = $_POST['marca'] ?? 'Jeda TTR';
     if ($marca === 'Otro') {
         $marca = trim($_POST['otra_marca'] ?? 'Otra marca');
     }
@@ -161,7 +161,7 @@ require_once '../includes/encabezado.php';
         <div class="campo">
             <label for="marca">Marca del equipo</label>
             <select id="marca" name="marca" onchange="mostrarCajaOtraMarca(this.value)">
-                <option value="Jedda TT8">Jedda TT8</option>
+                <option value="Jeda TTR">Jeda TTR</option>
                 <option value="Microtex/Electronics">Microtex/Electronics</option>
                 <option value="Deval">Deval</option>
                 <option value="Intelliprobe">Intelliprobe</option>

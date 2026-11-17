@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
 
             $pdo->commit();
-            $mensaje = "El equipo ha sido recibido y ahora está EN REVISIÓN por el departamento de TIC's.";
+            $mensaje = "El equipo ha sido recibido y ahora está en revisión.";
         } catch (PDOException $e) {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Obtener la lista actualizada de equipos pendientes
 try {
-    $stmtPendientes = $pdo->query("SELECT id, numero_serie FROM lectores WHERE estado = 'PENDIENTE_RECEPCION' ORDER BY creado_en ASC");
+    $stmtPendientes = $pdo->query("SELECT id, numero_serie FROM lectores WHERE estado = 'PENDIENTE RECEPCION' ORDER BY creado_en ASC");
     $pendientes = $stmtPendientes->fetchAll();
 } catch (PDOException $e) {
     $error = "Error al cargar equipos: " . $e->getMessage();
@@ -80,7 +80,7 @@ require_once '../includes/encabezado.php';
     <?php if (count($pendientes) > 0): ?>
         <form method="POST" action="recepcion.php" onsubmit="return confirm('¿Confirmas que tienes el equipo físicamente en tus manos y procedes a recibirlo?');">
             <div class="campo">
-                <label for="lector_id">Equipos en Tránsito (Pendientes) *</label>
+                <label for="lector_id">Equipos Pendientes *</label>
                 <select id="lector_id" name="lector_id" required>
                     <option value="">-- Seleccione el equipo que acaba de recibir --</option>
                     <?php foreach ($pendientes as $equipo): ?>
@@ -97,8 +97,7 @@ require_once '../includes/encabezado.php';
                        maxlength="5" minlength="5" 
                        pattern="^[A-Za-z0-9]{5}$"
                        style="text-transform: uppercase;" 
-                       onkeyup="this.value = this.value.toUpperCase();" 
-                       required placeholder="Ej. A1B2C">
+                       onkeyup="this.value = this.value.toUpperCase();">
             </div>
 
             <div class="campo">
@@ -107,8 +106,7 @@ require_once '../includes/encabezado.php';
                        maxlength="5" minlength="5" 
                        pattern="^[A-Za-z0-9]{5}$"
                        style="text-transform: uppercase;" 
-                       onkeyup="this.value = this.value.toUpperCase();" 
-                       required placeholder="Ej. D3E4F">
+                       onkeyup="this.value = this.value.toUpperCase();">
             </div>
             
             <button type="submit" style="background-color: #0288d1;">Confirmar Recepción</button>

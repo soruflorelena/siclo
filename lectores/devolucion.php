@@ -103,7 +103,7 @@ require_once '../includes/encabezado.php';
                 <textarea id="detalles" name="detalles" placeholder="Ej: Se cambió el cable USB, se limpió el lente, etc."></textarea>
             </div>
 
-            <button type="submit" style="background-color: #388e3c;">Confirmar Entrega (Activar)</button>
+            <button type="submit" style="background-color: #388e3c;">Confirmar Entrega</button>
         </form>
     <?php else: ?>
         <p style="padding: 15px; background-color: #e0f7fa; border-radius: 4px; color: #006064;">

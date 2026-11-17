@@ -80,9 +80,9 @@ require_once '../includes/encabezado.php';
         <div class="campo">
             <label for="marca">Marca del equipo *</label>
             <select id="marca" name="marca" onchange="mostrarCajaOtraMarca(this.value)">
-                <option value="Jedda TT8">Jedda TT8</option>
+                <option value="Jeda TTR">Jeda TTR</option>
                 <option value="Microtex/Electronics">Microtex/Electronics</option>
-                <option value="DAVAD">DAVAD</option>
+                <option value="Davad">Davad</option>
                 <option value="Intelliprobe">Intelliprobe</option>
                 <option value="Otro">Otro (Especificar)</option>
             </select>
