@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // 2. Registrar el movimiento en el historial con los RPE involucrados
             $descripcion = "Equipo recibido físicamente en TIC's. Entregó (RPE): $rpe_entrega. Recibió (RPE): $rpe_recibe.";
             $sqlHistorial = "INSERT INTO historial (lector_id, accion, descripcion, usuario_id) 
-                             VALUES (:lector_id, 'RECEPCION_EQUIPO', :descripcion, :usuario_id)";
+                             VALUES (:lector_id, 'RECEPCION EQUIPO', :descripcion, :usuario_id)";
             $stmtHistorial = $pdo->prepare($sqlHistorial);
             $stmtHistorial->execute([
                 'lector_id' => $lector_id,
