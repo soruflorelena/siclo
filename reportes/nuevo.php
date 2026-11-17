@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmtVerificar->execute(['serie' => $serie]);
         $lectorExistente = $stmtVerificar->fetch();
 
-        if ($lectorExistente && in_array($lectorExistente['estado'], ['PENDIENTE_RECEPCION', 'EN_REVISION'])) {
+        if ($lectorExistente && in_array($lectorExistente['estado'], ['PENDIENTE RECEPCION', 'EN REVISION'])) {
             $error = "El equipo con serie $serie ya tiene un reporte activo y actualmente se encuentra " . str_replace('_', ' ', $lectorExistente['estado']) . ". No se puede duplicar el reporte.";
         } else {
             try {
@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $lector_id = $lector['id'];
                 }
 
-                $sqlEstado = "UPDATE lectores SET estado = 'PENDIENTE_RECEPCION' WHERE id = :lector_id";
+                $sqlEstado = "UPDATE lectores SET estado = 'PENDIENTE RECEPCION' WHERE id = :lector_id";
                 $stmtEstado = $pdo->prepare($sqlEstado);
                 $stmtEstado->execute(['lector_id' => $lector_id]);
 

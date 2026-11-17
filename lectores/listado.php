@@ -74,8 +74,8 @@ require_once '../includes/encabezado.php';
                             <?php 
                                 $color = '#333';
                                 if ($lector['estado'] === 'ACTIVO') $color = 'green';
-                                if ($lector['estado'] === 'PENDIENTE_RECEPCION') $color = 'orange';
-                                if ($lector['estado'] === 'EN_REVISION') $color = '#0288d1';
+                                if ($lector['estado'] === 'PENDIENTE RECEPCION') $color = 'orange';
+                                if ($lector['estado'] === 'EN REVISION') $color = '#0288d1';
                                 if ($lector['estado'] === 'BAJA') $color = 'red';
                             ?>
                             <span style="font-weight: bold; color: <?php echo $color; ?>;">

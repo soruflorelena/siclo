@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Obtener solo los equipos que están en revisión 
 try {
-    $stmtRevision = $pdo->query("SELECT id, numero_serie FROM lectores WHERE estado = 'EN_REVISION' ORDER BY numero_serie ASC");
+    $stmtRevision = $pdo->query("SELECT id, numero_serie FROM lectores WHERE estado = 'EN REVISION' ORDER BY numero_serie ASC");
     $en_revision = $stmtRevision->fetchAll();
 } catch (PDOException $e) {
     $error = "Error al cargar equipos: " . $e->getMessage();

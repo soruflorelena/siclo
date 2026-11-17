@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->beginTransaction();
 
             // Cambiar el estado del lector a EN_REVISION
-            $sqlUpdate = "UPDATE lectores SET estado = 'EN_REVISION' WHERE id = :id";
+            $sqlUpdate = "UPDATE lectores SET estado = 'EN REVISION' WHERE id = :id";
             $stmtUpdate = $pdo->prepare($sqlUpdate);
             $stmtUpdate->execute(['id' => $lector_id]);
 
