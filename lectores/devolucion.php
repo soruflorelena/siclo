@@ -95,8 +95,7 @@ require_once '../includes/encabezado.php';
                        maxlength="5" minlength="5" 
                        pattern="^[A-Za-z0-9]{5}$" 
                        style="text-transform: uppercase;" 
-                       onkeyup="this.value = this.value.toUpperCase();" 
-                       required placeholder="Ej. A1B2C">
+                       onkeyup="this.value = this.value.toUpperCase();">
             </div>
 
             <div class="campo">

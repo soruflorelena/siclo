@@ -12,7 +12,8 @@ $pdo = obtener_conexion();
 $usuario_id = $_SESSION['usuario_id'];
 
 $sql = "SELECT r.folio, r.numero_ticket, r.falla, r.creado_en, 
-               l.numero_serie, l.estado, c.nombre AS centro_trabajo 
+               l.numero_serie, l.estado, l.tipo_conector, r.coordenada_x, r.coordenada_y,
+               c.nombre AS centro_trabajo 
         FROM reportes_falla r
         INNER JOIN lectores l ON r.lector_id = l.id
         INNER JOIN centros_trabajo c ON r.centro_trabajo_id = c.id
@@ -41,6 +42,7 @@ require_once '../includes/encabezado.php';
                     <th>Centro de Trabajo</th>
                     <th>Estado Físico</th>
                     <th>Falla Reportada</th>
+                    <th>Daño Marcado</th>
                 </tr>
             </thead>
             <tbody>
@@ -57,6 +59,24 @@ require_once '../includes/encabezado.php';
                             </span>
                         </td>
                         <td><?php echo htmlspecialchars($reporte['falla']); ?></td>
+                        <td>
+                            <?php
+                                $img_src = ($reporte['tipo_conector'] === 'USB') ? '../img/usb.png' : '../img/db17.png';
+                                $x = $reporte['coordenada_x'];
+                                $y = $reporte['coordenada_y'];
+                            ?>
+                            <a href="ver_dano.php?folio=<?php echo urlencode($reporte['folio']); ?>" title="Ver imagen completa">
+                                <div style="position: relative; display: inline-block; border: 1px solid #ccc; line-height: 0;">
+                                    <img src="<?php echo $img_src; ?>" alt="Lector" style="width: 110px; height: auto; display: block;">
+                                    <?php if ($x !== null && $y !== null): ?>
+                                        <div style="position: absolute; left: <?php echo (float) $x; ?>%; top: <?php echo (float) $y; ?>%; transform: translate(-50%, -50%); font-size: 14px; line-height: 1;">❌</div>
+                                    <?php endif; ?>
+                                </div>
+                            </a>
+                            <?php if ($x === null || $y === null): ?>
+                                <br><small>Sin marca</small>
+                            <?php endif; ?>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

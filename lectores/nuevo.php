@@ -23,7 +23,6 @@ try {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $numero_serie = trim($_POST['numero_serie']);
-    $foto_url = trim($_POST['foto_url']); 
     $centro_trabajo_id = $_POST['centro_trabajo_id'];
     $rpe_asociado = trim($_POST['rpe_asociado']);
     $tipo_conector = $_POST['tipo_conector'];
@@ -72,7 +71,11 @@ require_once '../includes/encabezado.php';
     <form method="POST" action="nuevo.php">
         <div class="campo">
             <label for="numero_serie">Número de Serie *</label>
-            <input type="text" id="numero_serie" name="numero_serie" required>
+            <input type="text" id="numero_serie" name="numero_serie" 
+                   value="<?php echo htmlspecialchars($lector['numero_serie'] ?? ''); ?>"  
+                   style="text-transform: uppercase;" 
+                   onkeyup="this.value = this.value.toUpperCase();" 
+                   required>
         </div>
         <div class="campo">
             <label for="marca">Marca del equipo *</label>
@@ -123,15 +126,17 @@ require_once '../includes/encabezado.php';
         </div>
         <div class="campo">
             <label for="rpe_asociado">RPE del Trabajador Asociado</label>
-            <input type="text" id="rpe_asociado" name="rpe_asociado">
+            <input type="text" id="rpe_asociado" name="rpe_asociado" 
+                   value="<?php echo htmlspecialchars($lector['rpe_asociado'] ?? ''); ?>" 
+                   maxlength="5" minlength="5" 
+                   pattern="^[A-Za-z0-9]{5}$" 
+                   style="text-transform: uppercase;" 
+                   onkeyup="this.value = this.value.toUpperCase();" 
+                   required>
         </div>
         <div class="campo">
             <label for="numero_etiqueta">Número de Etiqueta (Inventario)</label>
             <input type="text" id="numero_etiqueta" name="numero_etiqueta">
-        </div>
-        <div class="campo">
-            <label for="foto_url">Nombre de la Foto (Opcional)</label>
-            <input type="text" id="foto_url" name="foto_url">
         </div>
         <button type="submit">Guardar Lector</button>
     </form>

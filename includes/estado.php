@@ -14,3 +14,17 @@ function color_estado(string $estado): string
         default:                    return '#333333';
     }
 }
+
+function formato_accion(string $accion): string
+{
+    $clave = strtoupper(str_replace(' ', '_', trim($accion)));
+    $nombres = [
+        'ALTA_AUTOMATICA'   => 'Alta automática',
+        'REPORTE_FALLA'     => 'Reporte de falla',
+        'RECEPCION_EQUIPO'  => 'Recepción de equipo',
+        'DEVOLUCION_EQUIPO' => 'Devolución de equipo',
+        'BAJA_EQUIPO'       => 'Baja de equipo',
+        'EDICION_EQUIPO'    => 'Edición de equipo',
+    ];
+    return $nombres[$clave] ?? ucfirst(strtolower(str_replace('_', ' ', $accion)));
+}

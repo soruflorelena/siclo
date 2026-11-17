@@ -58,9 +58,19 @@ require_once 'includes/encabezado.php';
         <div class="campo">
             <label for="contrasena">Contraseña:</label>
             <input type="password" id="contrasena" name="contrasena" required>
+            <div style="margin-top: 8px;">
+                <input type="checkbox" id="ver_contrasena">
+                <label for="ver_contrasena" style="display: inline; font-weight: normal; cursor: pointer;">Mostrar contraseña</label>
+            </div>
         </div>
         <button type="submit" style="width: 100%;">Entrar</button>
     </form>
 </div>
+
+<script>
+    document.getElementById('ver_contrasena').addEventListener('change', function () {
+        document.getElementById('contrasena').type = this.checked ? 'text' : 'password';
+    });
+</script>
 
 <?php require_once 'includes/pie.php'; ?>

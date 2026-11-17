@@ -15,6 +15,9 @@ $reporte = $stmt->fetch();
 
 if (!$reporte) die("Reporte no encontrado.");
 $es_admin = ($_SESSION['rol'] === 'ADMINISTRADOR');
+if (!$es_admin && (int) $reporte['usuario_id'] !== (int) $_SESSION['usuario_id']) {
+    die("No tienes permiso para ver este reporte.");
+}
 if ($es_admin) {
     $url_volver = '../historial/lector.php?id=' . urlencode((string)$reporte['lector_id']);
     $texto_volver = '← Volver al Historial del Equipo';

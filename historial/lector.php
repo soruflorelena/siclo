@@ -7,6 +7,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'ADMINISTRADOR') {
 }
 
 require_once '../config/base_datos.php';
+require_once '../includes/estado.php';
 $pdo = obtener_conexion();
 
 // Recibir el ID del lector por la URL 
@@ -67,7 +68,9 @@ require_once '../includes/encabezado.php';
                 <?php foreach ($movimientos as $mov): ?>
                     <tr>
                         <td><?php echo htmlspecialchars(date('d/m/Y H:i:s', strtotime($mov['creado_en']))); ?></td>
-                        <td><strong><?php echo htmlspecialchars($mov['accion']); ?></strong></td>
+                        <td style="white-space: nowrap; vertical-align: top;">
+                            <span class="etiqueta-accion"><?php echo htmlspecialchars(formato_accion($mov['accion'])); ?></span>
+                        </td>
                         <td>
                             <?php echo htmlspecialchars($mov['descripcion']); ?>
                             

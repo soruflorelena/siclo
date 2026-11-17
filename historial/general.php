@@ -10,6 +10,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'ADMINISTRADOR') {
 }
 
 require_once '../config/base_datos.php';
+require_once '../includes/estado.php';
 $pdo = obtener_conexion();
 
 $sql = "SELECT h.creado_en, h.accion, h.descripcion, 
@@ -26,18 +27,22 @@ require_once '../includes/encabezado.php';
 ?>
 
 <div class="contenedor">
+    <style>
+        .tabla-historial td { vertical-align: top; }
+        .tabla-historial .etiqueta-accion { display: inline-block; white-space: nowrap; }
+    </style>
     <a href="../panel.php" class="boton-volver">← Volver al Panel</a>
     <h2>Historial General de Movimientos</h2>
 
     <?php if (count($movimientos) > 0): ?>
-        <table>
+        <table class="tabla-historial">
             <thead>
                 <tr>
-                    <th>Fecha</th>
-                    <th>Serie del Lector</th>
-                    <th>Acción</th>
+                    <th style="width: 130px;">Fecha</th>
+                    <th style="width: 120px;">Serie del Lector</th>
+                    <th style="width: 190px;">Acción</th>
                     <th>Descripción</th>
-                    <th>Usuario (RPE)</th>
+                    <th style="width: 110px;">Usuario (RPE)</th>
                 </tr>
             </thead>
             <tbody>
@@ -45,7 +50,7 @@ require_once '../includes/encabezado.php';
                     <tr>
                         <td><?php echo htmlspecialchars(date('d/m/Y H:i', strtotime($movimiento['creado_en']))); ?></td>
                         <td><?php echo htmlspecialchars($movimiento['numero_serie'] ?? 'N/A'); ?></td>
-                        <td><span class="etiqueta-accion"><?php echo htmlspecialchars($movimiento['accion']); ?></span></td>
+                        <td><span class="etiqueta-accion"><?php echo htmlspecialchars(formato_accion($movimiento['accion'])); ?></span></td>
                         <td><?php echo htmlspecialchars($movimiento['descripcion']); ?></td>
                         <td><?php echo htmlspecialchars($movimiento['usuario_rpe'] ?? 'Sistema'); ?></td>
                     </tr>

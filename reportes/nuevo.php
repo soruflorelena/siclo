@@ -146,7 +146,10 @@ require_once '../includes/encabezado.php';
         </div>
         <div class="campo">
             <label for="serie">Número de Serie del Lector *</label>
-            <input type="text" id="serie" name="serie" placeholder="Ingrese la serie exacta" required>
+            <input type="text" id="serie" name="serie" 
+            style="text-transform: uppercase;" 
+            onkeyup="this.value = this.value.toUpperCase();">
+
         </div>
         <div class="campo">
             <label for="tipo_conector">Tipo de Conector</label>
