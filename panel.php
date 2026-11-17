@@ -37,6 +37,7 @@ require_once 'includes/encabezado.php';
                     <h4>Control y Bajas</h4>
                     <a href="lectores/baja.php" class="btn-panel btn-red">Dar de Baja un Equipo</a>
                     <a href="historial/general.php" class="btn-panel btn-dark">Historial General</a>
+                    <a href="indicadores.php" class="btn-panel btn-blue">Indicadores</a>
                 </div>
             <?php endif; ?>
 

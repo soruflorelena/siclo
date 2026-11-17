@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // 3. Registrar en el historial qué fue lo que se modificó
             $descripcion = "Datos actualizados. Nuevo responsable (RPE): $nuevo_rpe. (RPE anterior: " . $lectorAnterior['rpe_asociado'] . ").";
             $sqlHist = "INSERT INTO historial (lector_id, accion, descripcion, usuario_id) 
-                        VALUES (:lector_id, 'EDICION_EQUIPO', :descripcion, :usuario_id)";
+                        VALUES (:lector_id, 'EDICION EQUIPO', :descripcion, :usuario_id)";
             $stmtHist = $pdo->prepare($sqlHist);
             $stmtHist->execute([
                 'lector_id' => $lector_id,

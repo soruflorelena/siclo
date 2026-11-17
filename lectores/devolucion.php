@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Registrar la entrega en el historial con lo que se le reparó y añadir el RPE del receptor al historial
             $descripcion = "Equipo devuelto a operación. Entregado a RPE: $rpe_receptor. Detalles: " . ($detalles ?: 'Sin detalles adicionales');
             $sqlHistorial = "INSERT INTO historial (lector_id, accion, descripcion, usuario_id) 
-                             VALUES (:lector_id, 'DEVOLUCION_EQUIPO', :descripcion, :usuario_id)";
+                             VALUES (:lector_id, 'DEVOLUCION EQUIPO', :descripcion, :usuario_id)";
             $stmtHistorial = $pdo->prepare($sqlHistorial);
             $stmtHistorial->execute([
                 'lector_id' => $lector_id,

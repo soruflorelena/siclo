@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Registrar la baja en el historial
             $descripcion = "Baja por $motivo. Detalles: " . ($detalles ?: 'Sin detalles adicionales');
             $sqlHistorial = "INSERT INTO historial (lector_id, accion, descripcion, usuario_id) 
-                             VALUES (:lector_id, 'BAJA_EQUIPO', :descripcion, :usuario_id)";
+                             VALUES (:lector_id, 'BAJA EQUIPO', :descripcion, :usuario_id)";
             $stmtHistorial = $pdo->prepare($sqlHistorial);
             $stmtHistorial->execute([
                 'lector_id' => $lector_id,
