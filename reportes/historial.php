@@ -7,6 +7,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'USUARIO') {
 }
 
 require_once '../config/base_datos.php';
+require_once '../includes/estado.php';
 $pdo = obtener_conexion();
 $usuario_id = $_SESSION['usuario_id'];
 
@@ -25,7 +26,7 @@ $titulo_pagina = 'Mis Reportes - SICLO';
 require_once '../includes/encabezado.php';
 ?>
 
-<div class="contenedor">
+<div class="contenedor" style="max-width: 1000px; margin: 0 auto;">
     <a href="../panel.php" class="boton-volver">← Volver al Panel</a>
     <h2>Mis Reportes de Falla</h2>
 
@@ -51,7 +52,9 @@ require_once '../includes/encabezado.php';
                         <td><?php echo htmlspecialchars($reporte['numero_serie']); ?></td>
                         <td><?php echo htmlspecialchars($reporte['centro_trabajo']); ?></td>
                         <td>
-                            <strong><?php echo htmlspecialchars($reporte['estado']); ?></strong>
+                            <span style="font-weight: bold; color: <?php echo color_estado($reporte['estado']); ?>;">
+                                <?php echo htmlspecialchars(formato_estado($reporte['estado'])); ?>
+                            </span>
                         </td>
                         <td><?php echo htmlspecialchars($reporte['falla']); ?></td>
                     </tr>

@@ -174,7 +174,7 @@ require_once '../includes/encabezado.php';
         <div class="campo" style="margin-top: 20px;">
             <label>Marque con un clic en la imagen el área dañada del equipo (Opcional)</label>
             <div id="lienzo_equipo" style="position: relative; display: inline-block; border: 1px solid #ccc; cursor: crosshair; background: #fff; max-width: 100%;">
-                <img id="img_conector_interactiva" src="../img/usb.jpg" alt="Lector Óptico" style="max-width: 400px; height: auto; display: block;">
+                <img id="img_conector_interactiva" src="../img/usb.png" alt="Lector Óptico" style="max-width: 400px; height: auto; display: block;">
                 <div id="marcador_dano" style="display: none; position: absolute; color: red; font-weight: bold; font-size: 28px; transform: translate(-50%, -50%); pointer-events: none; text-shadow: 1px 1px 2px black;">❌</div>
             </div>
             <input type="hidden" id="coord_x" name="coord_x">
@@ -204,9 +204,9 @@ require_once '../includes/encabezado.php';
 
         selectConector.addEventListener('change', function() {
             if(this.value === 'USB') {
-                imgLienzo.src = '../img/usb.jpg';
+                imgLienzo.src = '../img/usb.png';
             } else {
-                imgLienzo.src = '../img/db17.jpg';
+                imgLienzo.src = '../img/db17.png';
             }
             marcador.style.display = 'none';
             inputX.value = '';

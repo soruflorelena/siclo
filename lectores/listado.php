@@ -7,6 +7,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'ADMINISTRADOR') {
 }
 
 require_once '../config/base_datos.php';
+require_once '../includes/estado.php';
 $pdo = obtener_conexion();
 
 // 1. Recibir término de búsqueda si existe
@@ -78,8 +79,8 @@ require_once '../includes/encabezado.php';
                                 if ($lector['estado'] === 'EN REVISION') $color = '#0288d1';
                                 if ($lector['estado'] === 'BAJA') $color = 'red';
                             ?>
-                            <span style="font-weight: bold; color: <?php echo $color; ?>;">
-                                <?php echo htmlspecialchars(ucwords(strtolower(str_replace('_', ' ', $lector['estado'])))); ?>
+                            <span style="font-weight: bold; color: <?php echo color_estado($lector['estado']); ?>;">
+                                <?php echo htmlspecialchars(formato_estado($lector['estado'])); ?>
                             </span>
                         </td>
                         <td style="display: flex; gap: 5px;">

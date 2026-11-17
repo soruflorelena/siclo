@@ -50,7 +50,8 @@ require_once '../includes/encabezado.php';
     
     <div style="background-color: #455a64; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
         <h2 style="margin: 0; color: white;">Historial del Equipo: <?php echo htmlspecialchars($lector['numero_serie']); ?></h2>
-        <p style="margin: 5px 0 0 0;">Estado Actual: <strong><?php echo htmlspecialchars(ucwords(strtolower(str_replace('_', ' ', $lector['estado'])))); ?>
+        <p style="margin: 5px 0 0 0;">Estado Actual: <strong><?php echo htmlspecialchars(ucwords(strtolower(str_replace('_', ' ', $lector['estado'])))); ?></strong></p>
+    </div>
 
     <table>
         <thead>
@@ -78,7 +79,7 @@ require_once '../includes/encabezado.php';
                                     $folioEncontrado = $matches[0] ?? '';
                                 ?>
                                 <?php if (!empty($folioEncontrado)): ?>
-                                    <br><a href="../reportes/ver_dano.php?folio=<?php echo $folioEncontrado; ?>" target="_blank" style="color: #0288d1; font-weight: bold; font-size: 0.9em; text-decoration: none;">🔍 Ver imagen del daño marcado</a>
+                                    <br><a href="../reportes/ver_dano.php?folio=<?php echo urlencode($folioEncontrado); ?>" style="color: #0288d1; font-weight: bold; font-size: 0.9em; text-decoration: none;">🔍 Ver imagen del daño marcado</a>
                                 <?php endif; ?>
                             <?php endif; ?>
                         </td>

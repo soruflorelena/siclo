@@ -14,6 +14,14 @@ $stmt->execute(['folio' => $folio]);
 $reporte = $stmt->fetch();
 
 if (!$reporte) die("Reporte no encontrado.");
+$es_admin = ($_SESSION['rol'] === 'ADMINISTRADOR');
+if ($es_admin) {
+    $url_volver = '../historial/lector.php?id=' . urlencode((string)$reporte['lector_id']);
+    $texto_volver = '← Volver al Historial del Equipo';
+} else {
+    $url_volver = 'historial.php';
+    $texto_volver = '← Volver a Mis Reportes';
+}
 
 $img_src = ($reporte['tipo_conector'] === 'USB') ? '../img/usb.png' : '../img/db17.png';
 $x = $reporte['coordenada_x'] ?? null;
@@ -24,7 +32,9 @@ require_once '../includes/encabezado.php';
 ?>
 
 <div class="contenedor" style="max-width: 600px; margin: 0 auto; text-align: center;">
-    <a href="inventario.php" class="btn-volver">← Volver</a>
+    <div style="text-align: left;">
+    <a href="<?php echo htmlspecialchars($url_volver); ?>" class="boton-volver"><?php echo $texto_volver; ?></a>
+    </div>
     <h2>Daño Físico Reportado (Folio: <?php echo htmlspecialchars($folio); ?>)</h2>
     
     <?php if ($x !== null && $y !== null): ?>
