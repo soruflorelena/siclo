@@ -67,7 +67,21 @@ require_once '../includes/encabezado.php';
                     <tr>
                         <td><?php echo htmlspecialchars(date('d/m/Y H:i:s', strtotime($mov['creado_en']))); ?></td>
                         <td><strong><?php echo htmlspecialchars($mov['accion']); ?></strong></td>
-                        <td><?php echo htmlspecialchars($mov['descripcion']); ?></td>
+                        <td>
+                            <?php echo htmlspecialchars($mov['descripcion']); ?>
+                            
+                            <!-- Si la acción fue un reporte de falla, mostramos el enlace para ver la imagen -->
+                            <?php if ($mov['accion'] === 'REPORTE_FALLA'): ?>
+                                <?php 
+                                    // Extraemos el folio del texto de la descripción usando una expresión regular
+                                    preg_match('/R-\d+/', $mov['descripcion'], $matches);
+                                    $folioEncontrado = $matches[0] ?? '';
+                                ?>
+                                <?php if (!empty($folioEncontrado)): ?>
+                                    <br><a href="../reportes/ver_dano.php?folio=<?php echo $folioEncontrado; ?>" target="_blank" style="color: #0288d1; font-weight: bold; font-size: 0.9em; text-decoration: none;">🔍 Ver imagen del daño marcado</a>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                        </td>
                         <td><?php echo htmlspecialchars($mov['usuario']); ?></td>
                     </tr>
                 <?php endforeach; ?>

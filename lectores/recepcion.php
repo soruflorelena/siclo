@@ -93,12 +93,22 @@ require_once '../includes/encabezado.php';
 
             <div class="campo">
                 <label for="rpe_entrega">RPE de quien entrega el equipo físico (Responsable de Entrega) *</label>
-                <input type="text" id="rpe_entrega" name="rpe_entrega">
+                <input type="text" id="rpe_entrega" name="rpe_entrega" 
+                       maxlength="5" minlength="5" 
+                       pattern="^[A-Za-z0-9]{5}$"
+                       style="text-transform: uppercase;" 
+                       onkeyup="this.value = this.value.toUpperCase();" 
+                       required placeholder="Ej. A1B2C">
             </div>
 
             <div class="campo">
                 <label for="rpe_recibe">RPE de quien recibe en TIC's *</label>
-                <input type="text" id="rpe_recibe" name="rpe_recibe">
+                <input type="text" id="rpe_recibe" name="rpe_recibe" 
+                       maxlength="5" minlength="5" 
+                       pattern="^[A-Za-z0-9]{5}$"
+                       style="text-transform: uppercase;" 
+                       onkeyup="this.value = this.value.toUpperCase();" 
+                       required placeholder="Ej. D3E4F">
             </div>
             
             <button type="submit" style="background-color: #0288d1;">Confirmar Recepción</button>

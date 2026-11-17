@@ -1,8 +1,6 @@
 <?php
 session_start();
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-header("Cache-Control: post-check=0, pre-check=0", false);
-header("Pragma: no-cache");
 
 if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'USUARIO') {
     header("Location: ../panel.php");
@@ -35,11 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $marca = trim($_POST['otra_marca'] ?? 'Otra marca');
     }
     $observaciones = trim($_POST['observaciones'] ?? '');
-    $coord_x = $_POST['coord_x'] ?? null; 
-    $coord_y = $_POST['coord_y'] ?? null; 
+    $coord_x = $_POST['coord_x'] ?? null;
+    $coord_y = $_POST['coord_y'] ?? null;
     $usuario_id = $_SESSION['usuario_id'];
-
-    
     
 
     if (empty($folio) || empty($centro_trabajo_id) || empty($falla) || empty($serie)) {
@@ -50,22 +46,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $lectorExistente = $stmtVerificar->fetch();
 
         if ($lectorExistente && in_array($lectorExistente['estado'], ['PENDIENTE_RECEPCION', 'EN_REVISION'])) {
-            $error = "El equipo con serie $serie ya tiene un reporte activo y actualmente se encuentra " . $lectorExistente['estado'] . ". No se puede duplicar el reporte.";
+            $error = "El equipo con serie $serie ya tiene un reporte activo y actualmente se encuentra " . str_replace('_', ' ', $lectorExistente['estado']) . ". No se puede duplicar el reporte.";
         } else {
             try {
                 $pdo->beginTransaction();
 
-                // Buscar si el lector ya existe para obtener su ID
                 $stmtLector = $pdo->prepare("SELECT id FROM lectores WHERE numero_serie = :serie LIMIT 1");
                 $stmtLector->execute(['serie' => $serie]);
                 $lector = $stmtLector->fetch();
 
-                // Si el lector no existe, se crea automáticamente
                 if (!$lector) {
                     $rpe_sesion = $_SESSION['rpe'];
                     $etiqueta_final = empty($numero_etiqueta) ? 'N/A' : $numero_etiqueta;
                     
-                    // Actualizar el INSERT para guardar la marca seleccionada
                     $sqlNuevoLector = "INSERT INTO lectores (numero_serie, centro_trabajo_id, rpe_asociado, tipo_conector, numero_etiqueta, marca) 
                                     VALUES (:serie, :centro_trabajo_id, :rpe_sesion, :tipo_conector, :etiqueta, :marca)";
                     $stmtNuevo = $pdo->prepare($sqlNuevoLector);
@@ -94,7 +87,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmtEstado = $pdo->prepare($sqlEstado);
                 $stmtEstado->execute(['lector_id' => $lector_id]);
 
-                // Insertar el reporte de falla con observaciones
                 $sqlFalla = "INSERT INTO reportes_falla (folio, numero_ticket, falla, centro_trabajo_id, lector_id, usuario_id, observaciones, coordenada_x, coordenada_y) 
                             VALUES (:folio, :numero_ticket, :falla, :centro_trabajo_id, :lector_id, :usuario_id, :observaciones, :coord_x, :coord_y)";
                 $stmtFalla = $pdo->prepare($sqlFalla);
@@ -110,7 +102,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'coord_y' => empty($coord_y) ? null : $coord_y
                 ]);
 
-                // Registrar la falla en el historial
                 $descripcion_historial = "Falla reportada. Folio: $folio. Ticket: " . ($numero_ticket ?: 'N/A');
                 $sqlHistorial = "INSERT INTO historial (lector_id, accion, descripcion, usuario_id) 
                                  VALUES (:lector_id, 'REPORTE_FALLA', :descripcion, :usuario_id)";
@@ -122,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ]);
 
                 $pdo->commit();
-                $mensaje = "Falla reportada exitosamente con el folio: $folio. El equipo está 'Pendiente de Recepción'.";
+                $mensaje = "Falla reportada exitosamente con el folio: $folio. El equipo está Pendiente de Recepción.";
             } catch (PDOException $e) {
                 if ($pdo->inTransaction()) {
                     $pdo->rollBack();
@@ -148,7 +139,7 @@ require_once '../includes/encabezado.php';
         <p style="color: red; font-weight: bold; padding: 10px; background-color: #ffebee;"><?php echo htmlspecialchars($error); ?></p>
     <?php endif; ?>
 
-    <form method="POST" action="nuevo.php">
+    <form method="POST" action="nuevo.php" autocomplete="off">
         <div class="campo">
             <label for="numero_ticket">Número de Ticket</label>
             <input type="text" id="numero_ticket" name="numero_ticket">
@@ -169,7 +160,7 @@ require_once '../includes/encabezado.php';
             <select id="marca" name="marca" onchange="mostrarCajaOtraMarca(this.value)">
                 <option value="Jedda TT8">Jedda TT8</option>
                 <option value="Microtex/Electronics">Microtex/Electronics</option>
-                <option value="DAVAD">DAVAD</option>
+                <option value="Deval">Deval</option>
                 <option value="Intelliprobe">Intelliprobe</option>
                 <option value="Otro">Otro (Especificar)</option>
             </select>
@@ -180,76 +171,62 @@ require_once '../includes/encabezado.php';
             <input type="text" id="otra_marca" name="otra_marca" placeholder="Escriba el nombre de la marca">
         </div>
 
-        <!-- Interfaz gráfica de daño físico -->
         <div class="campo" style="margin-top: 20px;">
             <label>Marque con un clic en la imagen el área dañada del equipo (Opcional)</label>
-            <p style="font-size: 0.8em; color: #666; margin-top: -5px; margin-bottom: 10px;">La imagen cambiará según el tipo de conector seleccionado arriba.</p>
-            
             <div id="lienzo_equipo" style="position: relative; display: inline-block; border: 1px solid #ccc; cursor: crosshair; background: #fff; max-width: 100%;">
-                <img id="img_conector_interactiva" src="../img/usb.png" alt="Lector Óptico" style="max-width: 400px; height: auto; display: block;">
-                
-                <!-- La 'X' que aparecerá al hacer clic -->
+                <img id="img_conector_interactiva" src="../img/usb.jpg" alt="Lector Óptico" style="max-width: 400px; height: auto; display: block;">
                 <div id="marcador_dano" style="display: none; position: absolute; color: red; font-weight: bold; font-size: 28px; transform: translate(-50%, -50%); pointer-events: none; text-shadow: 1px 1px 2px black;">❌</div>
             </div>
-
-            <!-- Estos campos ocultos viajan en el POST al enviar el formulario -->
             <input type="hidden" id="coord_x" name="coord_x">
             <input type="hidden" id="coord_y" name="coord_y">
         </div>
 
         <script>
-            const selectConector = document.getElementById('tipo_conector');
-            const imgLienzo = document.getElementById('img_conector_interactiva');
-            const lienzo = document.getElementById('lienzo_equipo');
-            const marcador = document.getElementById('marcador_dano');
-            const inputX = document.getElementById('coord_x');
-            const inputY = document.getElementById('coord_y');
-
-            // Cambiar la imagen si el usuario elige USB o DB17
-            selectConector.addEventListener('change', function() {
-                if(this.value === 'USB') {
-                    imgLienzo.src = '../img/usb.png';
-                } else {
-                    imgLienzo.src = '../img/db17.png';
-                }
-                // Limpiar marcador anterior al cambiar de imagen
-                marcador.style.display = 'none';
-                inputX.value = '';
-                inputY.value = '';
-            });
-
-            // Capturar el clic y poner la X
-            lienzo.addEventListener('click', function(e) {
-                const rect = lienzo.getBoundingClientRect();
-                const clickX = e.clientX - rect.left;
-                const clickY = e.clientY - rect.top;
-
-                // Posicionar la X visualmente
-                marcador.style.left = clickX + 'px';
-                marcador.style.top = clickY + 'px';
-                marcador.style.display = 'block';
-
-                // Guardar como porcentaje para que no se mueva si la pantalla cambia de tamaño
-                inputX.value = ((clickX / rect.width) * 100).toFixed(2);
-                inputY.value = ((clickY / rect.height) * 100).toFixed(2);
-            });
-        </script>
-
-        <script>
         function mostrarCajaOtraMarca(valorSeleccionado) {
             var divOculto = document.getElementById('div_otra_marca');
             var inputOtra = document.getElementById('otra_marca');
-            
             if (valorSeleccionado === 'Otro') {
-                divOculto.style.display = 'block'; 
-                inputOtra.required = true;        
+                divOculto.style.display = 'block';
+                inputOtra.required = true;
             } else {
-                divOculto.style.display = 'none';  
-                inputOtra.required = false;       
-                inputOtra.value = '';              
+                divOculto.style.display = 'none';
+                inputOtra.required = false;
+                inputOtra.value = '';
             }
         }
+
+        const selectConector = document.getElementById('tipo_conector');
+        const imgLienzo = document.getElementById('img_conector_interactiva');
+        const lienzo = document.getElementById('lienzo_equipo');
+        const marcador = document.getElementById('marcador_dano');
+        const inputX = document.getElementById('coord_x');
+        const inputY = document.getElementById('coord_y');
+
+        selectConector.addEventListener('change', function() {
+            if(this.value === 'USB') {
+                imgLienzo.src = '../img/usb.jpg';
+            } else {
+                imgLienzo.src = '../img/db17.jpg';
+            }
+            marcador.style.display = 'none';
+            inputX.value = '';
+            inputY.value = '';
+        });
+
+        lienzo.addEventListener('click', function(e) {
+            const rect = lienzo.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+
+            marcador.style.left = clickX + 'px';
+            marcador.style.top = clickY + 'px';
+            marcador.style.display = 'block';
+
+            inputX.value = ((clickX / rect.width) * 100).toFixed(2);
+            inputY.value = ((clickY / rect.height) * 100).toFixed(2);
+        });
         </script>
+
         <div class="campo">
             <label for="numero_etiqueta">Número de Etiqueta</label>
             <input type="text" id="numero_etiqueta" name="numero_etiqueta">

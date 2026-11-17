@@ -77,9 +77,9 @@ require_once '../includes/encabezado.php';
         <div class="campo">
             <label for="marca">Marca del equipo *</label>
             <select id="marca" name="marca" onchange="mostrarCajaOtraMarca(this.value)">
-                <option value="Jeda TT8">Jeda TT8</option>
+                <option value="Jedda TT8">Jedda TT8</option>
                 <option value="Microtex/Electronics">Microtex/Electronics</option>
-                <option value="Davad">DAVAD</option>
+                <option value="DAVAD">DAVAD</option>
                 <option value="Intelliprobe">Intelliprobe</option>
                 <option value="Otro">Otro (Especificar)</option>
             </select>
@@ -95,12 +95,12 @@ require_once '../includes/encabezado.php';
             var divOculto = document.getElementById('div_otra_marca');
             var inputOtra = document.getElementById('otra_marca');
             if (valorSeleccionado === 'Otro') {
-                divOculto.style.display = 'block'; 
-                inputOtra.required = true;         
+                divOculto.style.display = 'block';
+                inputOtra.required = true;
             } else {
-                divOculto.style.display = 'none';  
-                inputOtra.required = false;        
-                inputOtra.value = '';              
+                divOculto.style.display = 'none';
+                inputOtra.required = false;
+                inputOtra.value = '';
             }
         }
         </script>

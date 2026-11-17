@@ -91,7 +91,12 @@ require_once '../includes/encabezado.php';
             </div>
             <div class="campo">
                 <label for="rpe_receptor">RPE de quien recibe el equipo *</label>
-                <input type="text" id="rpe_receptor" name="rpe_receptor">
+                <input type="text" id="rpe_receptor" name="rpe_receptor" 
+                       maxlength="5" minlength="5" 
+                       pattern="^[A-Za-z0-9]{5}$" 
+                       style="text-transform: uppercase;" 
+                       onkeyup="this.value = this.value.toUpperCase();" 
+                       required placeholder="Ej. A1B2C">
             </div>
 
             <div class="campo">

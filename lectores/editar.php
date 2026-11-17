@@ -120,7 +120,13 @@ require_once '../includes/encabezado.php';
 
         <div class="campo">
             <label for="rpe_asociado">RPE del Trabajador Responsable *</label>
-            <input type="text" id="rpe_asociado" name="rpe_asociado" value="<?php echo htmlspecialchars($lector['rpe_asociado'] ?? ''); ?>" required>
+            <input type="text" id="rpe_asociado" name="rpe_asociado" 
+                   value="<?php echo htmlspecialchars($lector['rpe_asociado'] ?? ''); ?>" 
+                   maxlength="5" minlength="5" 
+                   pattern="^[A-Za-z0-9]{5}$" 
+                   style="text-transform: uppercase;" 
+                   onkeyup="this.value = this.value.toUpperCase();" 
+                   required>
         </div>
 
         <div class="campo">
