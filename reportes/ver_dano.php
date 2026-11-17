@@ -15,7 +15,7 @@ $reporte = $stmt->fetch();
 
 if (!$reporte) die("Reporte no encontrado.");
 
-$img_src = ($reporte['tipo_conector'] === 'USB') ? '../img/usb.jpg' : '../img/db17.jpg';
+$img_src = ($reporte['tipo_conector'] === 'USB') ? '../img/usb.png' : '../img/db17.png';
 $x = $reporte['coordenada_x'] ?? null;
 $y = $reporte['coordenada_y'] ?? null;
 
@@ -24,7 +24,7 @@ require_once '../includes/encabezado.php';
 ?>
 
 <div class="contenedor" style="max-width: 600px; margin: 0 auto; text-align: center;">
-    <a href="javascript:history.back()" class="boton-volver">← Volver</a>
+    <a href="javascript:history.back();" class="btn-volver">← Volver al Inventario</a>
     <h2>Daño Físico Reportado (Folio: <?php echo htmlspecialchars($folio); ?>)</h2>
     
     <?php if ($x !== null && $y !== null): ?>
