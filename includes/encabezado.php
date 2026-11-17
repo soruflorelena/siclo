@@ -67,7 +67,12 @@ $titulo = $titulo_pagina ?? 'SICLO';
         </div>
         <div class="enlaces-header">
             <?php if (isset($_SESSION['usuario_id'])): ?>
-                <span><?php echo htmlspecialchars($_SESSION['rpe']); ?> (<?php echo htmlspecialchars($_SESSION['rol']); ?>)</span>
+                <span>
+                    <?php if (!empty($_SESSION['nombre'])): ?>
+                        <strong><?php echo htmlspecialchars($_SESSION['nombre']); ?></strong> ·
+                    <?php endif; ?>
+                    <?php echo htmlspecialchars($_SESSION['rpe']); ?> 
+                </span>
                 <a href="/panel.php">Inicio</a>
                 <a href="/cerrar_sesion.php">Cerrar sesión</a>
             <?php endif; ?>

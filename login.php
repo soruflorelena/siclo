@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($rpe) || empty($contrasena)) {
         $error = 'Por favor, ingresa tu RPE y contraseña.';
     } else {
-        $sql = "SELECT id, rpe, contrasena_hash, rol FROM usuarios WHERE rpe = :rpe";
+        $sql = "SELECT id, rpe, nombre, contrasena_hash, rol FROM usuarios WHERE rpe = :rpe";
         $stmt = $pdo->prepare($sql);
         $stmt->execute(['rpe' => $rpe]);
         $usuario = $stmt->fetch();
@@ -26,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             session_regenerate_id(true);
             $_SESSION['usuario_id'] = $usuario['id'];
             $_SESSION['rpe'] = $usuario['rpe'];
+            $_SESSION['nombre'] = $usuario['nombre'] ?? '';
             $_SESSION['rol'] = $usuario['rol'];
             header("Location: panel.php");
             exit;
