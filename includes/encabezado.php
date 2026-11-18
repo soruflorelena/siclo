@@ -52,6 +52,7 @@ $titulo = $titulo_pagina ?? 'SICLO';
         .btn-panel:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); filter: brightness(1.1); }
         .btn-panel:last-child { margin-bottom: 0; }
         .btn-blue { background-color: #0288d1; }
+        .btn-purple { background-color: #6a1b9a; }
         .btn-teal { background-color: #00897b; }
         .btn-orange { background-color: #f57c00; }
         .btn-green { background-color: #388e3c; }

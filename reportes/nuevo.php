@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $serie = strtoupper(trim($_POST['serie'] ?? ''));
     $numero_etiqueta = strtoupper(trim($_POST['numero_etiqueta'] ?? '')); 
     $tipo_conector = $_POST['tipo_conector'] ?? 'USB'; 
-    $marca = $_POST['marca'] ?? 'Jedda TT8';
+    $marca = $_POST['marca'] ?? 'Jeda TTR';
     if ($marca === 'Otro') {
         $marca = trim($_POST['otra_marca'] ?? 'Otra marca');
     }
@@ -189,6 +189,7 @@ require_once '../includes/encabezado.php';
                 <select id="fecha_mes" aria-label="Mes" style="flex: 2;"></select>
                 <select id="fecha_anio" aria-label="Año" style="flex: 1.3;"></select>
             </div>
+            <small id="aviso_fecha" style="color: #c62828;"></small>
             <!-- Valor que se envía al servidor (AAAA-MM-DD); se actualiza con los tres selectores -->
             <input type="hidden" id="fecha_falla" name="fecha_falla" value="<?php echo htmlspecialchars($hoy); ?>">
         </div>
@@ -210,9 +211,9 @@ require_once '../includes/encabezado.php';
         <div class="campo">
             <label for="marca">Marca del equipo</label>
             <select id="marca" name="marca" onchange="mostrarCajaOtraMarca(this.value)">
-                <option value="Jedda TT8">Jedda TT8</option>
+                <option value="Jeda TTR">Jeda TTR</option>
                 <option value="Microtex/Electronics">Microtex/Electronics</option>
-                <option value="Deval">Deval</option>
+                <option value="Davad">Davad</option>
                 <option value="Intelliprobe">Intelliprobe</option>
                 <option value="Otro">Otro (Especificar)</option>
             </select>
@@ -224,7 +225,7 @@ require_once '../includes/encabezado.php';
         </div>
 
         <div class="campo" style="margin-top: 20px;">
-            <label>Marque con X en la siguiente imagen, las áreas dañadas del equipo (rotas o deterioradas)</label>
+            <label>Marque con clics en la imagen las áreas dañadas del equipo. Puede marcar varias (Opcional)</label>
             <div id="lienzo_equipo" style="position: relative; display: inline-block; border: 1px solid #ccc; cursor: crosshair; background: #fff; max-width: 100%;">
                 <img id="img_conector_interactiva" src="../img/usb.png" alt="Lector Óptico" style="max-width: 400px; height: auto; display: block;">
             </div>
@@ -313,6 +314,7 @@ require_once '../includes/encabezado.php';
             const selMes = document.getElementById('fecha_mes');
             const selAnio = document.getElementById('fecha_anio');
             const oculto = document.getElementById('fecha_falla');
+            const aviso = document.getElementById('aviso_fecha');
 
             // Se puede elegir el año actual y los dos anteriores
             for (let a = anioHoy; a >= anioHoy - 2; a--) {
@@ -333,9 +335,8 @@ require_once '../includes/encabezado.php';
                 }
                 selMes.value = mes;
 
-                // Días disponibles (según el mes, sin pasar de hoy)
-                let diasMax = new Date(anio, mes, 0).getDate();
-                if (anio === anioHoy && mes === mesHoy) { diasMax = Math.min(diasMax, diaHoy); }
+                // Días disponibles: todos los del mes (28, 29, 30 o 31)
+                const diasMax = new Date(anio, mes, 0).getDate();
                 let dia = Number(selDia.value) || diaHoy;
                 if (dia > diasMax) { dia = diasMax; }
                 selDia.innerHTML = '';
@@ -343,6 +344,12 @@ require_once '../includes/encabezado.php';
                     selDia.add(new Option(i, i));
                 }
                 selDia.value = dia;
+
+                // Una fecha posterior a hoy no es válida: se avisa y se bloquea el envío
+                const futura = (anio === anioHoy && mes === mesHoy && dia > diaHoy);
+                const textoAviso = futura ? 'La fecha de la falla no puede ser posterior a hoy.' : '';
+                selDia.setCustomValidity(textoAviso);
+                aviso.textContent = textoAviso;
 
                 oculto.value = anio + '-' + String(mes).padStart(2, '0') + '-' + String(dia).padStart(2, '0');
             }

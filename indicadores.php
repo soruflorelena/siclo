@@ -89,7 +89,7 @@ try {
     $disponibilidad = $enServicio > 0 ? round($activos * 100 / $enServicio, 1) : null;
 
     // ---------- 2. Fallas por centro de trabajo ----------
-    [$f, $p] = filtro_fechas('r.creado_en', $desde, $hasta);
+    [$f, $p] = filtro_fechas('r.fecha_falla', $desde, $hasta);
     $porCentro = consultar($pdo,
         "SELECT c.nombre, COUNT(*) AS total
            FROM reportes_falla r
@@ -100,7 +100,7 @@ try {
 
     // ---------- 3. Fallas por mes ----------
     $porMes = consultar($pdo,
-        "SELECT to_char(date_trunc('month', r.creado_en), 'YYYY-MM') AS mes, COUNT(*) AS total
+        "SELECT to_char(date_trunc('month', r.fecha_falla), 'YYYY-MM') AS mes, COUNT(*) AS total
            FROM reportes_falla r
           WHERE 1=1 $f
           GROUP BY 1
@@ -143,7 +143,7 @@ SELECT EXTRACT(EPOCH FROM AVG(d.creado_en - r.creado_en)) / 3600 AS horas
          ORDER BY h.creado_en DESC
          LIMIT 1
        ) r ON TRUE
- WHERE d.accion = 'DEVOLUCION_EQUIPO'
+ WHERE REPLACE(d.accion, ' ', '_') = 'DEVOLUCION_EQUIPO'
 SQL
         . $fd, $pd);
     if (!empty($filaTiempo) && $filaTiempo[0]['horas'] !== null) {
@@ -157,7 +157,7 @@ SQL
 SELECT COALESCE(substring(h.descripcion from 'Baja por (.*)\. Detalles'), 'No especificado') AS motivo,
        COUNT(*) AS total
   FROM historial h
- WHERE h.accion = 'BAJA_EQUIPO'
+ WHERE REPLACE(h.accion, ' ', '_') = 'BAJA_EQUIPO'
 SQL
         . $fb . "\n GROUP BY 1 ORDER BY total DESC", $pb);
 } catch (PDOException $e) {
@@ -284,7 +284,7 @@ require_once 'includes/encabezado.php';
         <p>Sin datos.</p>
     <?php endif; ?>
 
-    <h4>Equipos con más fallas</h4>
+    <h4>Equipos con más fallas (top 5)</h4>
     <?php if ($topLectores): ?>
         <table style="width:100%; margin-bottom:24px;">
             <?php foreach ($topLectores as $fila): ?>
