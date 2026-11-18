@@ -11,6 +11,7 @@ require_once '../config/base_datos.php';
 $pdo = obtener_conexion();
 $mensaje = '';
 $error = '';
+$hoy = date('Y-m-d'); // fecha actual en UTC-6 (ver config/base_datos.php)
 
 try {
     $stmtCentros = $pdo->query("SELECT id, nombre FROM centros_trabajo WHERE activo = true ORDER BY nombre");
@@ -25,21 +26,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $falla = trim($_POST['falla'] ?? '');
     $numero_ticket = trim($_POST['numero_ticket'] ?? '');
 
-    $serie = trim($_POST['serie'] ?? '');
-    $numero_etiqueta = trim($_POST['numero_etiqueta'] ?? ''); 
+    $serie = strtoupper(trim($_POST['serie'] ?? ''));
+    $numero_etiqueta = strtoupper(trim($_POST['numero_etiqueta'] ?? '')); 
     $tipo_conector = $_POST['tipo_conector'] ?? 'USB'; 
-    $marca = $_POST['marca'] ?? 'Jeda TTR';
+    $marca = $_POST['marca'] ?? 'Jedda TT8';
     if ($marca === 'Otro') {
         $marca = trim($_POST['otra_marca'] ?? 'Otra marca');
     }
     $observaciones = trim($_POST['observaciones'] ?? '');
-    $coord_x = $_POST['coord_x'] ?? null;
-    $coord_y = $_POST['coord_y'] ?? null;
+
+    // Marcas de daño: JSON con una lista de pares [x, y] en porcentaje (puede haber varias)
+    $marcas = [];
+    $marcas_json = json_decode($_POST['marcas'] ?? '[]', true);
+    if (is_array($marcas_json)) {
+        foreach (array_slice($marcas_json, 0, 20) as $punto) {
+            if (!is_array($punto)) {
+                continue;
+            }
+            $punto = array_values($punto);
+            if (count($punto) === 2 && is_numeric($punto[0]) && is_numeric($punto[1])) {
+                $mx = round((float) $punto[0], 2);
+                $my = round((float) $punto[1], 2);
+                if ($mx >= 0 && $mx <= 100 && $my >= 0 && $my <= 100) {
+                    $marcas[] = [$mx, $my];
+                }
+            }
+        }
+    }
     $usuario_id = $_SESSION['usuario_id'];
-    
+
+    // Fecha de la falla: por defecto hoy, pero puede ser una fecha anterior
+    $fecha_falla = trim($_POST['fecha_falla'] ?? $hoy);
+    $fecha_obj = DateTime::createFromFormat('Y-m-d', $fecha_falla);
+    $fecha_valida = $fecha_obj && $fecha_obj->format('Y-m-d') === $fecha_falla;
 
     if (empty($folio) || empty($centro_trabajo_id) || empty($falla) || empty($serie)) {
         $error = 'Por favor, llena los campos obligatorios.';
+    } elseif ($numero_ticket !== '' && !ctype_digit($numero_ticket)) {
+        $error = 'El número de ticket solo puede contener números.';
+    } elseif (!$fecha_valida) {
+        $error = 'La fecha de la falla no es válida.';
+    } elseif ($fecha_falla > $hoy) {
+        $error = 'La fecha de la falla no puede ser posterior a hoy.';
     } else {
         $stmtVerificar = $pdo->prepare("SELECT estado FROM lectores WHERE numero_serie = :serie");
         $stmtVerificar->execute(['serie' => $serie]);
@@ -87,8 +115,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmtEstado = $pdo->prepare($sqlEstado);
                 $stmtEstado->execute(['lector_id' => $lector_id]);
 
-                $sqlFalla = "INSERT INTO reportes_falla (folio, numero_ticket, falla, centro_trabajo_id, lector_id, usuario_id, observaciones, coordenada_x, coordenada_y) 
-                            VALUES (:folio, :numero_ticket, :falla, :centro_trabajo_id, :lector_id, :usuario_id, :observaciones, :coord_x, :coord_y)";
+                $sqlFalla = "INSERT INTO reportes_falla (folio, numero_ticket, falla, centro_trabajo_id, lector_id, usuario_id, observaciones, fecha_falla) 
+                            VALUES (:folio, :numero_ticket, :falla, :centro_trabajo_id, :lector_id, :usuario_id, :observaciones, :fecha_falla)
+                            RETURNING id";
                 $stmtFalla = $pdo->prepare($sqlFalla);
                 $stmtFalla->execute([
                     'folio' => $folio,
@@ -98,11 +127,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'lector_id' => $lector_id,
                     'usuario_id' => $usuario_id,
                     'observaciones' => empty($observaciones) ? null : $observaciones,
-                    'coord_x' => empty($coord_x) ? null : $coord_x,
-                    'coord_y' => empty($coord_y) ? null : $coord_y
+                    'fecha_falla' => $fecha_falla
                 ]);
+                $reporte_id = (int) $stmtFalla->fetchColumn();
 
-                $descripcion_historial = "Falla reportada. Folio: $folio. Ticket: " . ($numero_ticket ?: 'N/A');
+                // Guardar cada marca de daño (puede haber varias)
+                $stmtMarca = $pdo->prepare("INSERT INTO reporte_marcas (reporte_id, coordenada_x, coordenada_y, orden)
+                                            VALUES (:reporte_id, :x, :y, :orden)");
+                foreach ($marcas as $i => [$mx, $my]) {
+                    $stmtMarca->execute([
+                        'reporte_id' => $reporte_id,
+                        'x' => $mx,
+                        'y' => $my,
+                        'orden' => $i + 1
+                    ]);
+                }
+
+                $descripcion_historial = "Falla reportada. Folio: $folio. Ticket: " . ($numero_ticket ?: 'N/A')
+                    . ". Fecha de la falla: " . date('d/m/Y', strtotime($fecha_falla));
                 $sqlHistorial = "INSERT INTO historial (lector_id, accion, descripcion, usuario_id) 
                                  VALUES (:lector_id, 'REPORTE_FALLA', :descripcion, :usuario_id)";
                 $stmtHistorial = $pdo->prepare($sqlHistorial);
@@ -141,15 +183,22 @@ require_once '../includes/encabezado.php';
 
     <form method="POST" action="nuevo.php" autocomplete="off">
         <div class="campo">
+            <label for="fecha_dia">Fecha de la falla *</label>
+            <div style="display: flex; gap: 8px;">
+                <select id="fecha_dia" aria-label="Día" style="flex: 1;"></select>
+                <select id="fecha_mes" aria-label="Mes" style="flex: 2;"></select>
+                <select id="fecha_anio" aria-label="Año" style="flex: 1.3;"></select>
+            </div>
+            <!-- Valor que se envía al servidor (AAAA-MM-DD); se actualiza con los tres selectores -->
+            <input type="hidden" id="fecha_falla" name="fecha_falla" value="<?php echo htmlspecialchars($hoy); ?>">
+        </div>
+        <div class="campo">
             <label for="numero_ticket">Número de Ticket</label>
-            <input type="text" id="numero_ticket" name="numero_ticket">
+            <input type="text" id="numero_ticket" name="numero_ticket" inputmode="numeric" pattern="[0-9]*" title="Solo números" oninput="this.value = this.value.replace(/\D/g, '')">
         </div>
         <div class="campo">
             <label for="serie">Número de Serie del Lector *</label>
-            <input type="text" id="serie" name="serie" 
-            style="text-transform: uppercase;" 
-            onkeyup="this.value = this.value.toUpperCase();">
-
+            <input type="text" id="serie" name="serie" placeholder="Ingrese la serie exacta" autocapitalize="characters" oninput="var s = this.selectionStart, e = this.selectionEnd; this.value = this.value.toUpperCase(); this.setSelectionRange(s, e);" required>
         </div>
         <div class="campo">
             <label for="tipo_conector">Tipo de Conector</label>
@@ -161,7 +210,7 @@ require_once '../includes/encabezado.php';
         <div class="campo">
             <label for="marca">Marca del equipo</label>
             <select id="marca" name="marca" onchange="mostrarCajaOtraMarca(this.value)">
-                <option value="Jeda TTR">Jeda TTR</option>
+                <option value="Jedda TT8">Jedda TT8</option>
                 <option value="Microtex/Electronics">Microtex/Electronics</option>
                 <option value="Deval">Deval</option>
                 <option value="Intelliprobe">Intelliprobe</option>
@@ -175,13 +224,15 @@ require_once '../includes/encabezado.php';
         </div>
 
         <div class="campo" style="margin-top: 20px;">
-            <label>Marque con un clic en la imagen el área dañada del equipo (Opcional)</label>
+            <label>Marque con X en la siguiente imagen, las áreas dañadas del equipo (rotas o deterioradas)</label>
             <div id="lienzo_equipo" style="position: relative; display: inline-block; border: 1px solid #ccc; cursor: crosshair; background: #fff; max-width: 100%;">
                 <img id="img_conector_interactiva" src="../img/usb.png" alt="Lector Óptico" style="max-width: 400px; height: auto; display: block;">
-                <div id="marcador_dano" style="display: none; position: absolute; color: red; font-weight: bold; font-size: 28px; transform: translate(-50%, -50%); pointer-events: none; text-shadow: 1px 1px 2px black;">❌</div>
             </div>
-            <input type="hidden" id="coord_x" name="coord_x">
-            <input type="hidden" id="coord_y" name="coord_y">
+            <div style="margin-top: 6px;">
+                <button type="button" id="btn_limpiar_marcas" style="background: #455a64; padding: 4px 10px; font-size: 0.85em;">Limpiar marcas</button>
+                <small id="contador_marcas" style="margin-left: 8px; color: #555;">Sin marcas</small>
+            </div>
+            <input type="hidden" id="marcas" name="marcas" value="[]">
         </div>
 
         <script>
@@ -201,9 +252,35 @@ require_once '../includes/encabezado.php';
         const selectConector = document.getElementById('tipo_conector');
         const imgLienzo = document.getElementById('img_conector_interactiva');
         const lienzo = document.getElementById('lienzo_equipo');
-        const marcador = document.getElementById('marcador_dano');
-        const inputX = document.getElementById('coord_x');
-        const inputY = document.getElementById('coord_y');
+        const inputMarcas = document.getElementById('marcas');
+        const btnLimpiar = document.getElementById('btn_limpiar_marcas');
+        const contador = document.getElementById('contador_marcas');
+        const MAX_MARCAS = 20;
+        let marcas = []; // cada marca es [x%, y%] respecto a la imagen
+
+        function actualizarMarcas() {
+            lienzo.querySelectorAll('.marca-dano').forEach(function (el) { el.remove(); });
+            marcas.forEach(function (p) {
+                const m = document.createElement('div');
+                m.className = 'marca-dano';
+                m.textContent = '\u274C';
+                m.style.cssText = 'position: absolute; left: ' + p[0] + '%; top: ' + p[1] + '%; color: red; font-weight: bold; font-size: 28px; transform: translate(-50%, -50%); pointer-events: none; text-shadow: 1px 1px 2px black;';
+                lienzo.appendChild(m);
+            });
+            inputMarcas.value = JSON.stringify(marcas);
+            if (marcas.length === 0) {
+                contador.textContent = 'Sin marcas';
+            } else if (marcas.length === 1) {
+                contador.textContent = '1 marca';
+            } else {
+                contador.textContent = marcas.length + ' marcas' + (marcas.length >= MAX_MARCAS ? ' (máximo)' : '');
+            }
+        }
+
+        function limpiarMarcas() {
+            marcas = [];
+            actualizarMarcas();
+        }
 
         selectConector.addEventListener('change', function() {
             if(this.value === 'USB') {
@@ -211,28 +288,75 @@ require_once '../includes/encabezado.php';
             } else {
                 imgLienzo.src = '../img/db17.png';
             }
-            marcador.style.display = 'none';
-            inputX.value = '';
-            inputY.value = '';
+            limpiarMarcas();
         });
 
         lienzo.addEventListener('click', function(e) {
+            if (marcas.length >= MAX_MARCAS) { return; }
             const rect = lienzo.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const clickY = e.clientY - rect.top;
-
-            marcador.style.left = clickX + 'px';
-            marcador.style.top = clickY + 'px';
-            marcador.style.display = 'block';
-
-            inputX.value = ((clickX / rect.width) * 100).toFixed(2);
-            inputY.value = ((clickY / rect.height) * 100).toFixed(2);
+            const x = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100));
+            const y = Math.min(100, Math.max(0, ((e.clientY - rect.top) / rect.height) * 100));
+            marcas.push([parseFloat(x.toFixed(2)), parseFloat(y.toFixed(2))]);
+            actualizarMarcas();
         });
+
+        btnLimpiar.addEventListener('click', limpiarMarcas);
+        actualizarMarcas();
+
+        // ----- Selector de fecha (día / mes / año), igual en cualquier navegador o idioma -----
+        (function () {
+            const partes = '<?php echo htmlspecialchars($hoy); ?>'.split('-').map(Number);
+            const anioHoy = partes[0], mesHoy = partes[1], diaHoy = partes[2];
+            const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio',
+                           'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            const selDia = document.getElementById('fecha_dia');
+            const selMes = document.getElementById('fecha_mes');
+            const selAnio = document.getElementById('fecha_anio');
+            const oculto = document.getElementById('fecha_falla');
+
+            // Se puede elegir el año actual y los dos anteriores
+            for (let a = anioHoy; a >= anioHoy - 2; a--) {
+                selAnio.add(new Option(a, a));
+            }
+            selAnio.value = anioHoy;
+
+            function reconstruir() {
+                const anio = Number(selAnio.value);
+
+                // Meses disponibles (no se permiten meses futuros)
+                const mesesMax = (anio === anioHoy) ? mesHoy : 12;
+                let mes = Number(selMes.value) || mesHoy;
+                if (mes > mesesMax) { mes = mesesMax; }
+                selMes.innerHTML = '';
+                for (let i = 1; i <= mesesMax; i++) {
+                    selMes.add(new Option(MESES[i - 1], i));
+                }
+                selMes.value = mes;
+
+                // Días disponibles (según el mes, sin pasar de hoy)
+                let diasMax = new Date(anio, mes, 0).getDate();
+                if (anio === anioHoy && mes === mesHoy) { diasMax = Math.min(diasMax, diaHoy); }
+                let dia = Number(selDia.value) || diaHoy;
+                if (dia > diasMax) { dia = diasMax; }
+                selDia.innerHTML = '';
+                for (let i = 1; i <= diasMax; i++) {
+                    selDia.add(new Option(i, i));
+                }
+                selDia.value = dia;
+
+                oculto.value = anio + '-' + String(mes).padStart(2, '0') + '-' + String(dia).padStart(2, '0');
+            }
+
+            selAnio.addEventListener('change', reconstruir);
+            selMes.addEventListener('change', reconstruir);
+            selDia.addEventListener('change', reconstruir);
+            reconstruir();
+        })();
         </script>
 
         <div class="campo">
             <label for="numero_etiqueta">Número de Etiqueta</label>
-            <input type="text" id="numero_etiqueta" name="numero_etiqueta">
+            <input type="text" id="numero_etiqueta" name="numero_etiqueta" autocapitalize="characters" oninput="var s = this.selectionStart, e = this.selectionEnd; this.value = this.value.toUpperCase(); this.setSelectionRange(s, e);">
         </div>
         <div class="campo">
             <label for="centro_trabajo_id">Centro de Trabajo *</label>

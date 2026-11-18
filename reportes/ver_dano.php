@@ -27,8 +27,10 @@ if ($es_admin) {
 }
 
 $img_src = ($reporte['tipo_conector'] === 'USB') ? '../img/usb.png' : '../img/db17.png';
-$x = $reporte['coordenada_x'] ?? null;
-$y = $reporte['coordenada_y'] ?? null;
+
+$stmtMarcas = $pdo->prepare("SELECT coordenada_x, coordenada_y FROM reporte_marcas WHERE reporte_id = :id ORDER BY orden, id");
+$stmtMarcas->execute(['id' => $reporte['id']]);
+$marcas = $stmtMarcas->fetchAll();
 
 $titulo_pagina = 'Daño Físico - SICLO';
 require_once '../includes/encabezado.php';
@@ -40,11 +42,14 @@ require_once '../includes/encabezado.php';
     </div>
     <h2>Daño Físico Reportado (Folio: <?php echo htmlspecialchars($folio); ?>)</h2>
     
-    <?php if ($x !== null && $y !== null): ?>
+    <?php if (count($marcas) > 0): ?>
         <div style="position: relative; display: inline-block; border: 1px solid #ccc; max-width: 100%;">
             <img src="<?php echo $img_src; ?>" alt="Lector" style="max-width: 400px; display: block;">
-            <div style="position: absolute; left: <?php echo $x; ?>%; top: <?php echo $y; ?>%; color: red; font-weight: bold; font-size: 28px; transform: translate(-50%, -50%); text-shadow: 1px 1px 2px black;">❌</div>
+            <?php foreach ($marcas as $marca): ?>
+                <div style="position: absolute; left: <?php echo (float) $marca['coordenada_x']; ?>%; top: <?php echo (float) $marca['coordenada_y']; ?>%; color: red; font-weight: bold; font-size: 28px; transform: translate(-50%, -50%); text-shadow: 1px 1px 2px black;">❌</div>
+            <?php endforeach; ?>
         </div>
+        <p><?php echo count($marcas); ?> <?php echo count($marcas) === 1 ? 'área marcada' : 'áreas marcadas'; ?></p>
     <?php else: ?>
         <p>No se marcaron áreas de daño en la imagen para este reporte.</p>
     <?php endif; ?>
