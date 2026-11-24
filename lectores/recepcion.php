@@ -4,8 +4,8 @@ header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 
-// Solo el administrador puede recibir equipos
-if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'ADMINISTRADOR') {
+// Solo el administrador y el técnico pueden recibir equipos
+if (!isset($_SESSION['usuario_id']) || !in_array($_SESSION['rol'], ['ADMINISTRADOR', 'TECNICO'], true)) {
     header("Location: ../panel.php");
     exit;
 }

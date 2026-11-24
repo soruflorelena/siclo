@@ -1,12 +1,6 @@
 <?php
-/**
- * Normaliza el nombre de un trabajador para guardarlo en la base de datos:
- *  - quita espacios al inicio, al final y los repetidos,
- *  - lo convierte a MAYÚSCULAS respetando acentos y la ñ (José -> JOSÉ),
- *  - valida que solo tenga letras (con acentos), espacios, puntos, apóstrofos y guiones.
- *
- * Lanza InvalidArgumentException si el nombre no es válido.
- */
+/** Normaliza el nombre de un trabajador para guardarlo en la base de datos. */
+
 function normalizar_nombre(string $nombre): string
 {
     if (!function_exists('mb_strtoupper')) {

@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'ADMINISTRADOR') {
+if (!isset($_SESSION['usuario_id']) || !in_array($_SESSION['rol'], ['ADMINISTRADOR', 'TECNICO'], true)) {
     header("Location: ../panel.php");
     exit;
 }
@@ -85,7 +85,9 @@ require_once '../includes/encabezado.php';
                         </td>
                         <td style="display: flex; gap: 5px;">
                             <!-- Botón para Editar -->
-                            <a href="editar.php?id=<?php echo $lector['id']; ?>" style="background-color: #0288d1; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 0.9em;">Editar</a>
+                            <?php if ($_SESSION['rol'] === 'ADMINISTRADOR'): ?>
+                                <a href="editar.php?id=<?php echo $lector['id']; ?>" style="background-color: #0288d1; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 0.9em;">Editar</a>
+                            <?php endif; ?>
                             
                             <!-- Botón para Ver Historial -->
                             <a href="../historial/lector.php?id=<?php echo $lector['id']; ?>" style="background-color: #455a64; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 0.9em;">Ver Historial</a>

@@ -34,12 +34,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo->beginTransaction();
 
-            // 1. Obtener los datos anteriores para saber qué cambió
+            // Obtener los datos anteriores para saber qué cambió
             $stmtLectorAnt = $pdo->prepare("SELECT rpe_asociado, centro_trabajo_id, numero_serie FROM lectores WHERE id = :id");
             $stmtLectorAnt->execute(['id' => $lector_id]);
             $lectorAnterior = $stmtLectorAnt->fetch();
 
-            // 2. Actualizar el lector
+            // Actualizar el lector
             $sqlUpd = "UPDATE lectores 
                        SET rpe_asociado = :rpe, centro_trabajo_id = :centro, numero_etiqueta = :etiqueta 
                        WHERE id = :id";
@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'id' => $lector_id
             ]);
 
-            // 3. Registrar en el historial qué fue lo que se modificó
+            // Registrar en el historial qué fue lo que se modificó
             $descripcion = "Datos actualizados. Nuevo responsable (RPE): $nuevo_rpe. (RPE anterior: " . $lectorAnterior['rpe_asociado'] . ").";
             $sqlHist = "INSERT INTO historial (lector_id, accion, descripcion, usuario_id) 
                         VALUES (:lector_id, 'EDICION EQUIPO', :descripcion, :usuario_id)";
@@ -107,7 +107,7 @@ require_once '../includes/encabezado.php';
     <form method="POST" action="editar.php?id=<?php echo htmlspecialchars($lector_id); ?>" onsubmit="return confirm('¿Confirmas los cambios para este equipo?');">
         <input type="hidden" name="id" value="<?php echo htmlspecialchars($lector_id); ?>">
 
-        <!-- El número de serie NO se edita porque es la identidad física del equipo -->
+        <!-- El número de serie no se edita porque es la identidad física del equipo -->
         <div class="campo">
             <label>Número de Serie (Solo lectura)</label>
             <input type="text" value="<?php echo htmlspecialchars($lector['numero_serie']); ?>" disabled style="background-color: #eee;">

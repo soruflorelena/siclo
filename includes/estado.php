@@ -25,6 +25,16 @@ function formato_accion(string $accion): string
         'DEVOLUCION_EQUIPO' => 'Devolución de equipo',
         'BAJA_EQUIPO'       => 'Baja de equipo',
         'EDICION_EQUIPO'    => 'Edición de equipo',
+        'REPARACION_EQUIPO' => 'Reparación de equipo',
     ];
     return $nombres[$clave] ?? ucfirst(strtolower(str_replace('_', ' ', $accion)));
+}
+
+function recortar_texto(string $texto, int $largo): string
+{
+    $texto = trim(preg_replace('/\s+/u', ' ', $texto) ?? $texto);
+    if (function_exists('mb_strimwidth')) {
+        return mb_strimwidth($texto, 0, $largo, '…', 'UTF-8');
+    }
+    return strlen($texto) > $largo ? substr($texto, 0, $largo) . '…' : $texto;
 }

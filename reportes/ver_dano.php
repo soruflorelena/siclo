@@ -14,7 +14,7 @@ $stmt->execute(['folio' => $folio]);
 $reporte = $stmt->fetch();
 
 if (!$reporte) die("Reporte no encontrado.");
-$es_admin = ($_SESSION['rol'] === 'ADMINISTRADOR');
+$es_admin = in_array($_SESSION['rol'], ['ADMINISTRADOR', 'TECNICO'], true); // personal de TIC: ve todos los reportes
 if (!$es_admin && (int) $reporte['usuario_id'] !== (int) $_SESSION['usuario_id']) {
     die("No tienes permiso para ver este reporte.");
 }

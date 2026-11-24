@@ -135,7 +135,7 @@ require_once '../includes/encabezado.php';
                    required>
         </div>
         <div class="campo">
-            <label for="numero_etiqueta">Número de Etiqueta (Inventario)</label>
+            <label for="numero_etiqueta">Número de Etiqueta / Inventario</label>
             <input type="text" id="numero_etiqueta" name="numero_etiqueta">
         </div>
         <button type="submit">Guardar Lector</button>

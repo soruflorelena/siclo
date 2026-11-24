@@ -37,10 +37,39 @@ require_once 'includes/encabezado.php';
                     <h4>Control y Bajas</h4>
                     <a href="lectores/baja.php" class="btn-panel btn-red">Dar de Baja un Equipo</a>
                     <a href="historial/general.php" class="btn-panel btn-dark">Historial General</a>
+                    <a href="indicadores.php" class="btn-panel btn-blue">Indicadores</a>
                 </div>
+
                 <div class="tarjeta-panel">
-                    <h4>Indicadores </h4>
-                    <a href="indicadores.php" class="btn-panel btn-purple">Indicadores</a>
+                    <h4>Reparaciones y Materiales</h4>
+                    <a href="reparaciones/historial.php" class="btn-panel btn-dark">Historial de Reparaciones</a>
+                    <a href="reparaciones/indicadores.php" class="btn-panel btn-blue">Indicadores de Materiales</a>
+                    <a href="reparaciones/materiales.php" class="btn-panel btn-teal">Catálogo de Materiales</a>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($_SESSION['rol'] === 'TECNICO'): ?>
+                <div class="tarjeta-panel">
+                    <h4>Inventario</h4>
+                    <a href="lectores/listado.php" class="btn-panel btn-blue">Consultar Inventario</a>
+                </div>
+
+                <div class="tarjeta-panel">
+                    <h4>Recepciones</h4>
+                    <a href="lectores/recepcion.php" class="btn-panel btn-orange">Recibir Equipo Dañado</a>
+                    <a href="lectores/devolucion.php" class="btn-panel btn-green">Devolver Equipo Reparado</a>
+                </div>
+
+                <div class="tarjeta-panel">
+                    <h4>Reparaciones</h4>
+                    <a href="reparaciones/nueva.php" class="btn-panel btn-orange">Registrar Reparación</a>
+                    <a href="reparaciones/historial.php" class="btn-panel btn-dark">Historial de Reparaciones</a>
+                </div>
+
+                <div class="tarjeta-panel">
+                    <h4>Materiales</h4>
+                    <a href="reparaciones/materiales.php" class="btn-panel btn-teal">Catálogo de Materiales</a>
+                    <a href="reparaciones/indicadores.php" class="btn-panel btn-blue">Indicadores de Materiales</a>
                 </div>
             <?php endif; ?>
 

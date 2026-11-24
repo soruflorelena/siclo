@@ -176,6 +176,7 @@ require_once 'includes/encabezado.php';
 
 <div class="contenedor" style="max-width: 1000px; margin: 0 auto;">
     <a href="panel.php" class="boton-volver">← Volver al Panel</a>
+    <a href="reparaciones/indicadores.php" class="boton-volver" style="margin-left: 20px;">Ver indicadores de materiales →</a>
     <h2>Indicadores de seguimiento</h2>
 
     <?php if ($error): ?>

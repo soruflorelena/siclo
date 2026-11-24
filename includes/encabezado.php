@@ -2,11 +2,11 @@
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
-// Asegurar que la sesión esté iniciada
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-// Definir el título de la página si no se ha definido
+
 $titulo = $titulo_pagina ?? 'SICLO';
 ?>
 <!DOCTYPE html>
@@ -45,7 +45,7 @@ $titulo = $titulo_pagina ?? 'SICLO';
         a.boton-volver { display: inline-block; margin-bottom: 20px; color: #00796b; text-decoration: none; font-weight: bold; }
         .etiqueta-accion { background: #e0f7fa; color: #006064; border: 1px solid #80deea; padding: 4px 8px; border-radius: 4px; font-size: 0.9em; font-weight: bold; }
 
-        /* Panel de control (compartido por administrador y usuario) */
+        /* Panel de control */
         .tarjeta-panel { background: #ffffff; padding: 20px; border-radius: 10px; border: 1px solid #e0e0e0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
         .tarjeta-panel h4 { margin-top: 0; color: #2c3e50; font-size: 1.1em; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
         .btn-panel { display: block; padding: 12px 15px; margin-bottom: 12px; text-align: center; text-decoration: none !important; color: #ffffff !important; font-weight: bold; border-radius: 6px; transition: transform 0.2s, box-shadow 0.2s, filter 0.2s; font-size: 0.95em; }

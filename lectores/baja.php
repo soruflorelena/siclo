@@ -57,7 +57,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Obtener los lectores que no están de baja 
 try {
-    $stmtLectores = $pdo->query("SELECT id, numero_serie, estado, numero_etiqueta FROM lectores WHERE estado != 'BAJA' ORDER BY numero_serie");
+    // Los equipos que el técnico marcó como irreparables aparecen primero
+    $stmtLectores = $pdo->query("SELECT * FROM (
+                                    SELECT l.id, l.numero_serie, l.estado, l.numero_etiqueta,
+                                           (SELECT r.resultado FROM reparaciones r
+                                             WHERE r.lector_id = l.id
+                                             ORDER BY r.creado_en DESC, r.id DESC LIMIT 1) AS ultima_reparacion
+                                      FROM lectores l
+                                     WHERE l.estado != 'BAJA'
+                                ) t
+                                ORDER BY COALESCE(t.ultima_reparacion = 'IRREPARABLE', FALSE) DESC, t.numero_serie");
     $lectores_disponibles = $stmtLectores->fetchAll();
 } catch (PDOException $e) {
     $error = "Error al cargar equipos: " . $e->getMessage();
@@ -87,6 +96,7 @@ require_once '../includes/encabezado.php';
                     <option value="<?php echo $lector['id']; ?>">
                         Serie: <?php echo htmlspecialchars($lector['numero_serie']); ?> 
                         (Estado actual: <?php echo htmlspecialchars(ucwords(strtolower(str_replace('_', ' ', $lector['estado'])))); ?>)
+                        <?php if (($lector['ultima_reparacion'] ?? '') === 'IRREPARABLE'): ?> ⚠ Irreparable (propuesto por el técnico)<?php endif; ?>
                     </option>
                 <?php endforeach; ?>
             </select>
