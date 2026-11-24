@@ -13,16 +13,30 @@ $mensaje = '';
 $error = '';
 $hoy = date('Y-m-d'); // fecha actual en UTC-6 (ver config/base_datos.php)
 
+// El centro de trabajo del reporte es siempre el de la cuenta del usuario
+$centro_usuario_id = null;
+$centro_usuario_nombre = '';
 try {
-    $stmtCentros = $pdo->query("SELECT id, nombre FROM centros_trabajo WHERE activo = true ORDER BY nombre");
-    $centros = $stmtCentros->fetchAll();
+    $stmtCentro = $pdo->prepare("SELECT u.centro_trabajo_id, c.nombre
+                                   FROM usuarios u
+                                   LEFT JOIN centros_trabajo c ON c.id = u.centro_trabajo_id
+                                  WHERE u.id = :id");
+    $stmtCentro->execute(['id' => $_SESSION['usuario_id']]);
+    $datosCentro = $stmtCentro->fetch();
+    if ($datosCentro && $datosCentro['centro_trabajo_id'] !== null) {
+        $centro_usuario_id = (int) $datosCentro['centro_trabajo_id'];
+        $centro_usuario_nombre = $datosCentro['nombre'] ?? '';
+    }
 } catch (PDOException $e) {
-    $error = "Error al cargar centros: " . $e->getMessage();
+    $error = "Error al cargar tu centro de trabajo: " . $e->getMessage();
+}
+if ($centro_usuario_id === null && $error === '') {
+    $error = 'Tu cuenta no tiene un centro de trabajo asignado. Contacta al administrador para poder reportar fallas.';
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $folio = 'R-' . mt_rand(10000, 99999);
-    $centro_trabajo_id = $_POST['centro_trabajo_id'] ?? '';
+    $centro_trabajo_id = $centro_usuario_id; // no se toma del formulario
     $falla = trim($_POST['falla'] ?? '');
     $numero_ticket = trim($_POST['numero_ticket'] ?? '');
 
@@ -60,7 +74,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $fecha_obj = DateTime::createFromFormat('Y-m-d', $fecha_falla);
     $fecha_valida = $fecha_obj && $fecha_obj->format('Y-m-d') === $fecha_falla;
 
-    if (empty($folio) || empty($centro_trabajo_id) || empty($falla) || empty($serie)) {
+    if ($centro_usuario_id === null) {
+        $error = 'Tu cuenta no tiene un centro de trabajo asignado. Contacta al administrador.';
+    } elseif (empty($folio) || empty($centro_trabajo_id) || empty($falla) || empty($serie)) {
         $error = 'Por favor, llena los campos obligatorios.';
     } elseif ($numero_ticket !== '' && !ctype_digit($numero_ticket)) {
         $error = 'El número de ticket solo puede contener números.';
@@ -69,11 +85,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($fecha_falla > $hoy) {
         $error = 'La fecha de la falla no puede ser posterior a hoy.';
     } else {
-        $stmtVerificar = $pdo->prepare("SELECT estado FROM lectores WHERE numero_serie = :serie");
+        $stmtVerificar = $pdo->prepare("SELECT estado, centro_trabajo_id FROM lectores WHERE numero_serie = :serie");
         $stmtVerificar->execute(['serie' => $serie]);
         $lectorExistente = $stmtVerificar->fetch();
 
-        if ($lectorExistente && in_array($lectorExistente['estado'], ['PENDIENTE RECEPCION', 'EN REVISION'])) {
+        if ($lectorExistente && (int) $lectorExistente['centro_trabajo_id'] !== (int) $centro_trabajo_id) {
+            $error = "El equipo con serie $serie está registrado en otro centro de trabajo, por lo que no puedes reportarlo desde el tuyo. Si el equipo cambió de lugar, pide al administrador que lo reasigne.";
+        } elseif ($lectorExistente && in_array($lectorExistente['estado'], ['PENDIENTE RECEPCION', 'EN REVISION'])) {
             $error = "El equipo con serie $serie ya tiene un reporte activo y actualmente se encuentra " . str_replace('_', ' ', $lectorExistente['estado']) . ". No se puede duplicar el reporte.";
         } else {
             try {
@@ -366,13 +384,8 @@ require_once '../includes/encabezado.php';
             <input type="text" id="numero_etiqueta" name="numero_etiqueta" autocapitalize="characters" oninput="var s = this.selectionStart, e = this.selectionEnd; this.value = this.value.toUpperCase(); this.setSelectionRange(s, e);">
         </div>
         <div class="campo">
-            <label for="centro_trabajo_id">Centro de Trabajo *</label>
-            <select id="centro_trabajo_id" name="centro_trabajo_id" required>
-                <option value="">-- Seleccione --</option>
-                <?php foreach ($centros as $centro): ?>
-                    <option value="<?php echo $centro['id']; ?>"><?php echo htmlspecialchars($centro['nombre']); ?></option>
-                <?php endforeach; ?>
-            </select>
+            <label for="centro_trabajo_nombre">Centro de Trabajo</label>
+            <input type="text" id="centro_trabajo_nombre" value="<?php echo htmlspecialchars($centro_usuario_nombre); ?>" readonly style="background: #f1f1f1;">
         </div>
         <div class="campo">
             <label for="falla">Descripción de la Falla *</label>
