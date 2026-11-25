@@ -19,7 +19,13 @@ $pdo = obtener_conexion();
 //     'USER1' => 'Teziutlán CCC',
 // ------------------------------------------------------------------
 $asignaciones = [
-    // 'USER1' => '',
+    '9L07E' => 'Altotonga',
+    '6A89A' => 'Teziutlán',
+    //'9M61K' => '',
+    '9MVPA' => 'Perote',
+    '9N6TJ' => 'Altotonga',
+    'GEY56' => 'Huehuetla',
+    'USER1' => 'CCC Teziutlán',
 ];
 
 echo "<h3>Asignación de centros de trabajo</h3>";
